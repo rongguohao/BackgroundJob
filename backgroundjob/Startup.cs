@@ -35,7 +35,7 @@ namespace backgroundjob
                 var connectionString = Configuration.GetConnectionString("Hangfire.Redis");
                 x.UseRedisStorage(connectionString, new RedisStorageOptions
                 {
-                    Prefix = "hangfire:"
+                    Prefix = "hao_hangfire:"
                 });
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
