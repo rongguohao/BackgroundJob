@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
-using Hangfire.MySql.Core;
 using Hangfire.Redis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
