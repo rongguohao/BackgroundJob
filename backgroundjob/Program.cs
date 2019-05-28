@@ -15,11 +15,11 @@ namespace backgroundjob
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args)
-                .UseUrls("http://*:6000")
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
+                .UseUrls("http://*:6000")
                 .Build().Run();
         }
 

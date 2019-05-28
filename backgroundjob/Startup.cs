@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.Annotations;
+using Hangfire.Dashboard;
+using Hangfire.MySql.Core;
 using Hangfire.Redis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,13 +34,17 @@ namespace backgroundjob
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHangfire(x=> {
+            services.AddHangfire(x =>
+            {
                 var connectionString = Configuration.GetConnectionString("Hangfire.Redis");
                 x.UseRedisStorage(connectionString, new RedisStorageOptions
                 {
-                    Prefix = "hao_hangfire:"
+                    Prefix = "hf:"
                 });
             });
+
+            services.AddTransient<IMessageService, MessageService>();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -52,11 +59,28 @@ namespace backgroundjob
                 app.UseHsts();
             }
 
-            app.UseHangfireServer();//启动Hangfire服务
-            app.UseHangfireDashboard();//启动hangfire面板
+            app.UseHangfireServer(new BackgroundJobServerOptions
+            {
+                WorkerCount = 5
+            });
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+            {
+                Authorization = new[] { new CustomAuthorizeFilter() },
+                
+            });
+
+            RecurringJob.AddOrUpdate<IMessageService>(a => a.SendMessage("你好"), Cron.Minutely);
 
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        public class CustomAuthorizeFilter : IDashboardAuthorizationFilter
+        {
+            public bool Authorize([NotNull] DashboardContext context)
+            {
+                return true;
+            }
         }
     }
 }
