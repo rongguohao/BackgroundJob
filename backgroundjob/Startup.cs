@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Annotations;
@@ -15,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 
 namespace backgroundjob
 {
@@ -43,7 +48,25 @@ namespace backgroundjob
                 });
             });
 
+            services.AddHttpClient("dy", a => { a.Timeout = TimeSpan.FromMinutes(3); })
+                    .AddPolicyHandler(Policy<HttpResponseMessage>
+                    .Handle<SocketException>()
+                    .Or<IOException>()
+                    .Or<HttpRequestException>()
+                    .WaitAndRetryForeverAsync(t => TimeSpan.FromSeconds(5), (ex, ts) =>
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("重试" + ts);
+                    }))
+                    .ConfigureHttpMessageHandlerBuilder((c) =>
+                    new HttpClientHandler()
+                    {
+                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                    });
+
+
             services.AddTransient<IDyService, DyService>();
+            services.AddTransient<IHttpHelper, HttpHelper>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
