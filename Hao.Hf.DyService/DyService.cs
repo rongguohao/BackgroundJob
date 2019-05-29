@@ -69,10 +69,16 @@ namespace Hao.Hf.DyService
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("异常：" + ex.ToString());
+            }
+            finally
+            {
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("结束！！！！");
+                Console.ReadKey();
             }
         }
 

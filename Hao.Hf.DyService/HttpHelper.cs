@@ -27,6 +27,7 @@ namespace Hao.Hf.DyService
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("http异常:" + ex.ToString());
                 return string.Empty;
             }
