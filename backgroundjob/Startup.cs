@@ -6,6 +6,7 @@ using Hangfire;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Hangfire.Redis;
+using Hao.Hf.DyService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -42,7 +43,7 @@ namespace backgroundjob
                 });
             });
 
-            services.AddTransient<IMessageService, MessageService>();
+            services.AddTransient<IDyService, DyService>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -61,22 +62,13 @@ namespace backgroundjob
             });
             app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
-                Authorization = new[] { new CustomAuthorizeFilter() },
+                Authorization = new[] { new DashboardAuthorizationFilter() },
                 
             });
 
-            RecurringJob.AddOrUpdate<IMessageService>(a => a.SendMessage("你好"), Cron.Minutely);
+            RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovie(), Cron.Hourly);
 
-            app.UseHttpsRedirection();
             app.UseMvc();
-        }
-
-        public class CustomAuthorizeFilter : IDashboardAuthorizationFilter
-        {
-            public bool Authorize([NotNull] DashboardContext context)
-            {
-                return true;
-            }
         }
     }
 }
