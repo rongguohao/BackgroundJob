@@ -8,23 +8,20 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace backgroundjob
+namespace hao.backgroundjob
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args)
+                .UseUrls("http://*:5000")
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
-                .UseUrls("http://*:5000")
                 .Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)  //默认的builder 读取配置文件
-                .UseStartup<Startup>();
     }
 }

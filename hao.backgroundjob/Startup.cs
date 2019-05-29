@@ -8,29 +8,29 @@ using Hangfire.Dashboard;
 using Hangfire.Redis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace backgroundjob
+namespace hao.backgroundjob
 {
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; }
-
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false) // 在运行时修改强类型配置，无需设置reloadOnChange:true,默认就为true,只需要使用IOptionsSnapshot接口,IOptions<> 生命周期为Singleton,IOptionsSnapshot<> 生命周期为Scope
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)  //没有的话 默认读取appsettings.json
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }
 
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHangfire(x =>
@@ -38,15 +38,13 @@ namespace backgroundjob
                 var connectionString = Configuration.GetConnectionString("Hangfire.Redis");
                 x.UseRedisStorage(connectionString, new RedisStorageOptions
                 {
-                    Prefix = "hao_hangfire:"
+                    Prefix = "haohangfire:"
                 });
             });
-
-            services.AddTransient<IMessageService, MessageService>();
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -56,18 +54,14 @@ namespace backgroundjob
 
             app.UseHangfireServer(new BackgroundJobServerOptions
             {
-                ServerName = "haohaoplay",
                 WorkerCount = 5
             });
+
             app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
-                Authorization = new[] { new CustomAuthorizeFilter() },
-                
+                Authorization = new[] { new CustomAuthorizeFilter() }
             });
 
-            RecurringJob.AddOrUpdate<IMessageService>(a => a.SendMessage("你好"), Cron.Minutely);
-
-            app.UseHttpsRedirection();
             app.UseMvc();
         }
 
