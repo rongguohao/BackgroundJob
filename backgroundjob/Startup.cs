@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
+using Hangfire.Dashboard.BasicAuthorization;
 using Hangfire.Redis;
 using Hao.Hf.DyService;
 using Microsoft.AspNetCore.Builder;
@@ -83,10 +84,33 @@ namespace backgroundjob
                 ServerName = "haohaoplay",
                 WorkerCount = 5
             });
+
+
+            BasicAuthAuthorizationFilter filter = new BasicAuthAuthorizationFilter(new BasicAuthAuthorizationFilterOptions
+            {
+
+                SslRedirect = false,          // 是否将所有非SSL请求重定向到SSL URL
+                RequireSsl = false,           // 需要SSL连接才能访问HangFire Dahsboard。强烈建议在使用基本身份验证时使用SSL
+                LoginCaseSensitive = false,   //登录检查是否区分大小写
+                Users = new[]
+                    {
+                        new BasicAuthAuthorizationUser
+                        {
+                            Login ="rongguohao",//用户名
+                            PasswordClear="7758258"
+                        }
+                    }
+            });
+
             app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
-                Authorization = new[] { new DashboardAuthorizationFilter() },
-                
+                DisplayStorageConnectionString = false,//是否显示数据库连接信息
+                IsReadOnlyFunc = Context =>
+                {
+
+                    return false;
+                },
+                Authorization = new List<IDashboardAuthorizationFilter>() { filter, new DashboardAuthorizationFilter() }
             });
 
             RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovie(), Cron.Hourly());
