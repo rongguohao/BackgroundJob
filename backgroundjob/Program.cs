@@ -19,7 +19,7 @@ namespace backgroundjob
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
-                .UseUrls("http://*:5000")
+                .UseUrls("http://*:5000") //hangfire看板只能打开5000端口
                 .Build().Run();
         }
 
