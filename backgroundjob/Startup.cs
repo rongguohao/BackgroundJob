@@ -66,7 +66,7 @@ namespace backgroundjob
                 
             });
 
-            RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovie(), Cron.Hourly);
+            RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovie(), Cron.Hourly());
 
             app.UseMvc();
         }
