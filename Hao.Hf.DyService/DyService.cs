@@ -54,7 +54,8 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    await GetMovie(_http, url, dom);
+                    bool flag=await GetMovie(_http, url, dom);
+                    if (!flag) continue; //继续下一页
 
                     if (pageNum > 0)
                     {
@@ -63,8 +64,8 @@ namespace Hao.Hf.DyService
                             var url2 = "https://www.dy2018.com/" + i + $"/index_{page}.html";
 
                             //获取电影
-                            await GetMovie(_http, url2);
-
+                            bool flag2 = await GetMovie(_http, url2);
+                            if (!flag2) break; //继续下一页
                         }
                     }
                 }
@@ -83,12 +84,12 @@ namespace Hao.Hf.DyService
         }
 
 
-        private static async Task GetMovie(IHttpHelper http, string url, IHtmlDocument dom = null)
+        private static async Task<bool> GetMovie(IHttpHelper http, string url, IHtmlDocument dom = null)
         {
             if (dom == null)
             {
                 var htmlDoc = await http.GetHtmlByUrl(url);
-                if (string.IsNullOrWhiteSpace(htmlDoc)) return;
+                if (string.IsNullOrWhiteSpace(htmlDoc)) return true;
                 dom = htmlParser.ParseDocument(htmlDoc);
             }
             var tables = dom.QuerySelectorAll("table.tbspan");
@@ -110,8 +111,10 @@ namespace Hao.Hf.DyService
                     var success = await InsertDB(movieInfo);
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
+                    if (!success) return false; //说明 遇到老数据
                 }
             }
+            return true;
         }
 
 
