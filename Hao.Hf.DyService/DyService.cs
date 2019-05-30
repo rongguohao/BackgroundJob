@@ -76,6 +76,7 @@ namespace Hao.Hf.DyService
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("异常：" + ex.ToString());
+                Console.ReadKey();
             }
             finally
             {
@@ -115,6 +116,7 @@ namespace Hao.Hf.DyService
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
                     if (!success) count++;
+                    Console.ReadKey();
                     if (count > 3) return false;
                 }
             }
@@ -146,12 +148,12 @@ namespace Hao.Hf.DyService
                 var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
 
                 string releaseDate = "";
-                string date = ps[8].InnerHtml;
+                string date = "";
                 string date2 = "";
-                if (date.Contains("/"))
+                if (ps[8].InnerHtml.Contains("/"))
                 {
-                    date = date.Split('/')[0];
-                    date2 = date.Split('/')[1];
+                    date = ps[8].InnerHtml.Split('/')[0];
+                    date2 = ps[8].InnerHtml.Split('/')[1];
                 }
                 foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}-\d{1,2}"))
                 {
@@ -161,7 +163,7 @@ namespace Hao.Hf.DyService
                 {
                     foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}-\d{1,2}"))
                     {
-                        releaseDate = match.Groups[0].Value;
+                        releaseDate = match.Groups[1].Value;
                     }
                 }
                 string directorTag = "导　　演";
