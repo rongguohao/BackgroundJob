@@ -115,7 +115,7 @@ namespace Hao.Hf.DyService
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
                     if (!success) count++;
-                    if (count > 3) return false;
+                    if (count > 10) return false;
                 }
             }
             return true;
