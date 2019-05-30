@@ -164,6 +164,53 @@ namespace Hao.Hf.DyService
                         releaseDate = match.Groups[0].Value;
                     }
                 }
+                if (string.IsNullOrWhiteSpace(releaseDate))
+                {
+                    date = ps[7].InnerHtml;
+                    date2 = "";
+                    if (ps[7].InnerHtml.Contains("/"))
+                    {
+                        date = ps[7].InnerHtml.Split('/')[0];
+                        date2 = ps[7].InnerHtml.Split('/')[1];
+                    }
+                    foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}-\d{1,2}"))
+                    {
+                        releaseDate = match.Groups[0].Value;
+                    }
+                    if (string.IsNullOrWhiteSpace(releaseDate))
+                    {
+                        foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}-\d{1,2}"))
+                        {
+                            releaseDate = match.Groups[0].Value;
+                        }
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(releaseDate))
+                {
+                    date = ps[8].InnerHtml;
+                    date2 = "";
+                    if (ps[8].InnerHtml.Contains("/"))
+                    {
+                        date = ps[8].InnerHtml.Split('/')[0];
+                        date2 = ps[8].InnerHtml.Split('/')[1];
+                    }
+                    foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}"))
+                    {
+                        releaseDate = match.Groups[0].Value;
+                    }
+                    if (string.IsNullOrWhiteSpace(releaseDate))
+                    {
+                        foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}"))
+                        {
+                            releaseDate = match.Groups[0].Value;
+                        }
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(releaseDate))
+                {
+                    releaseDate = ps[3].InnerHtml.Substring(6);
+                }
+
                 string directorTag = "导　　演";
                 string director = "";
                 int dIndex = 14;
