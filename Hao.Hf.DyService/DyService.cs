@@ -26,6 +26,8 @@ namespace Hao.Hf.DyService
 
         protected static int num = 1;
 
+        protected static int count = 0; 
+
         public DyService(IHttpHelper http)
         {
             _http = http;
@@ -54,8 +56,8 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    bool flag=await GetMovie(_http, url, dom);
-                    if (!flag) continue; //继续下一页
+                    var flag = await GetMovie(_http, url, dom);
+                    if (!flag) continue;
 
                     if (pageNum > 0)
                     {
@@ -65,7 +67,7 @@ namespace Hao.Hf.DyService
 
                             //获取电影
                             bool flag2 = await GetMovie(_http, url2);
-                            if (!flag2) break; //继续下一页
+                            if (!flag2) continue;
                         }
                     }
                 }
@@ -96,6 +98,7 @@ namespace Hao.Hf.DyService
 
             if (tables != null && tables.Count() > 0)
             {
+                count = 0;//初始化0
                 foreach (var tb in tables)
                 {
                     var href = tb.QuerySelectorAll("a").Where(a => a.GetAttribute("href").Contains(".html")).FirstOrDefault();
@@ -111,7 +114,8 @@ namespace Hao.Hf.DyService
                     var success = await InsertDB(movieInfo);
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
-                    if (!success) return false; //说明 遇到老数据
+                    if (!success) count++;
+                    if (count > 3) return false;
                 }
             }
             return true;
@@ -143,13 +147,22 @@ namespace Hao.Hf.DyService
 
                 string releaseDate = "";
                 string date = ps[8].InnerHtml;
+                string date2 = "";
                 if (date.Contains("/"))
                 {
                     date = date.Split('/')[0];
+                    date2 = date.Split('/')[1];
                 }
                 foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}-\d{1,2}"))
                 {
                     releaseDate = match.Groups[0].Value;
+                }
+                if(string.IsNullOrWhiteSpace(releaseDate))
+                {
+                    foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}-\d{1,2}"))
+                    {
+                        releaseDate = match.Groups[0].Value;
+                    }
                 }
                 string directorTag = "导　　演";
                 string director = "";
