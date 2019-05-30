@@ -113,7 +113,7 @@ namespace backgroundjob
                 Authorization = new List<IDashboardAuthorizationFilter>() { filter, new DashboardAuthorizationFilter() }
             });
 
-            RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovie(), Cron.Hourly());
+            RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovie(), Cron.Daily());
 
             app.UseMvc();
         }
