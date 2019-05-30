@@ -131,5 +131,9 @@ namespace Hao.Hf.DyService
         /// </summary>
         public DateTime? LastModifyTime { get; set; }
 
+        public bool? IsDeleted { get; set; }
+
+        public string Creator { get; set; }
+
     }
 }

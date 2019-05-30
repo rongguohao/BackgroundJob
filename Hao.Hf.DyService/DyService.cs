@@ -83,7 +83,6 @@ namespace Hao.Hf.DyService
         }
 
 
-
         private static async Task GetMovie(IHttpHelper http, string url, IHtmlDocument dom = null)
         {
             if (dom == null)
@@ -118,36 +117,81 @@ namespace Hao.Hf.DyService
 
         private static async Task<Movie> FillMovieInfoFormWeb(IHttpHelper http, string onlineURL)
         {
-            var movieHTML = await http.GetHtmlByUrl(onlineURL);
-            if (string.IsNullOrWhiteSpace(movieHTML)) return null;
-            var movieDoc = htmlParser.ParseDocument(movieHTML);
-            //电影的详细介绍 在id为Zoom的标签中
-            var zoom = movieDoc.GetElementById("Zoom");
-
-            var ps = zoom.QuerySelectorAll("p").ToList();
-
-            var divs = zoom.QuerySelectorAll("div").ToList();
-            if (divs.Count > 5)
+            try
             {
-                ps = ps.Take(2).ToList();
-                ps.AddRange(divs);
+                var movieHTML = await http.GetHtmlByUrl(onlineURL);
+                if (string.IsNullOrWhiteSpace(movieHTML)) return null;
+                var movieDoc = htmlParser.ParseDocument(movieHTML);
+
+                var score = movieDoc.QuerySelector("strong.rank").InnerHtml;
+                //电影的详细介绍 在id为Zoom的标签中
+                var zoom = movieDoc.GetElementById("Zoom");
+
+                var ps = zoom.QuerySelectorAll("p").ToList();
+
+                var divs = zoom.QuerySelectorAll("div").ToList();
+                if (divs.Count > 5)
+                {
+                    ps = ps.Take(2).ToList();
+                    ps.AddRange(divs);
+                }
+
+                var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
+
+                string releaseDate = "";
+                foreach (Match match in Regex.Matches(ps[8].InnerHtml, @"\d{4}-\d{1,2}-\d{1,2}"))
+                {
+                    releaseDate = match.Groups[0].Value;
+                }
+                string directorTag = "导　　演";
+                string director = "";
+                int dIndex = 14;
+                if (ps[14].InnerHtml.Contains(directorTag))
+                {
+                    dIndex = 14;
+                    director = ps[14].InnerHtml.Substring(6);
+                }
+                else if (ps[15].InnerHtml.Contains(directorTag))
+                {
+                    dIndex = 15;
+                    director = ps[15].InnerHtml.Substring(6);
+                }
+                else if (ps[16].InnerHtml.Contains(directorTag))
+                {
+                    dIndex = 16;
+                    director = ps[16].InnerHtml.Substring(6);
+                }
+
+                int cIndex = dIndex + 6;
+                while (!ps[cIndex].InnerHtml.Contains("简　　介"))
+                {
+                    cIndex++;
+                }
+
+                var movieInfo = new Movie()
+                {
+                    Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
+                    NameAnother = ps[1].InnerHtml.Substring(6),
+                    Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
+                    Area = ps[4].InnerHtml.Substring(6),
+                    Types = ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
+                    ReleaseDate = HConvert.ToDateTime(releaseDate),
+                    Score = HConvert.ToFloat(score),
+                    Director = director,
+                    MainActors = $",{ps[dIndex + 1].InnerHtml.Substring(6)},{ps[dIndex + 2].InnerHtml.Substring(6)},{ps[dIndex + 3].InnerHtml.Substring(6)},{ps[dIndex + 4].InnerHtml.Substring(6)},{ps[dIndex + 5].InnerHtml.Substring(6)},",
+                    Description = ps[cIndex + 1].InnerHtml,
+                    DownloadUrlFirst = lstDownLoadURL?.FirstOrDefault(),
+                    DownloadUrlSecond = lstDownLoadURL.Count() > 2 && !string.IsNullOrWhiteSpace(lstDownLoadURL[1]) ? lstDownLoadURL[1] : "",
+                    DownloadUrlThird = lstDownLoadURL.Count() > 3 && !string.IsNullOrWhiteSpace(lstDownLoadURL[2]) ? lstDownLoadURL[2] : "",
+                };
+                return movieInfo;
+            }
+            catch (Exception ex)
+            {
+
+                return null;
             }
 
-            var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Select(a => a.InnerHtml);
-
-
-            var movieInfo = new Movie()
-            {
-                Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
-                NameAnother = ps[1].InnerHtml.Substring(6),
-                Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
-                Area = ps[4].InnerHtml.Substring(6),
-                Types = ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
-                ReleaseDate = HConvert.ToDateTime(ps[8].InnerHtml.Substring(6, 10)),
-                Score = HConvert.ToDouble(ps[9].InnerHtml.Substring(6, 3)),
-                DownloadUrlFirst = lstDownLoadURL?.FirstOrDefault(),
-            };
-            return movieInfo;
         }
 
         /// <summary>
@@ -169,12 +213,14 @@ namespace Hao.Hf.DyService
             }
             info.CreatorID = -1;
             info.CreateTime = DateTime.Now;
+            info.Creator = "系统";
+            info.IsDeleted = false;
             using (IDbConnection dbConnection = new MySqlConnection(_connectionString))
             {
                 dbConnection.Open();
 
-                var sql = @" INSERT INTO Movie (ID,Name,NameAnother,Year,Area,Types,ReleaseDate,Score)  
-                                        VALUES (@ID,@Name,@NameAnother,@Year,@Area,@Types,@ReleaseDate,@Score)";
+                var sql = @" INSERT INTO Movie (ID,Name,NameAnother,Year,Area,Types,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator)  
+                                        VALUES (@ID,@Name,@NameAnother,@Year,@Area,@Types,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator)";
 
                 var res = await dbConnection.ExecuteAsync(sql, info);
 
