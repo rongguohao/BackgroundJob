@@ -142,7 +142,12 @@ namespace Hao.Hf.DyService
                 var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
 
                 string releaseDate = "";
-                foreach (Match match in Regex.Matches(ps[8].InnerHtml, @"\d{4}-\d{1,2}-\d{1,2}"))
+                string date = ps[8].InnerHtml;
+                if (date.Contains("/"))
+                {
+                    date = date.Split('/')[0];
+                }
+                foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}-\d{1,2}"))
                 {
                     releaseDate = match.Groups[0].Value;
                 }
