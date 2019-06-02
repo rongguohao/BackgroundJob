@@ -2,6 +2,7 @@
 using AngleSharp.Html.Parser;
 using Dapper;
 using Hao.Utility;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using Snowflake.Core;
 using System;
@@ -16,11 +17,14 @@ namespace Hao.Hf.DyService
 {
     public class DyService : IDyService
     {
+
+        protected IConfiguration _config { get; }
+
         protected IHttpHelper _http;
 
         protected static HtmlParser htmlParser = new HtmlParser();
 
-        protected const string _connectionString = "Data Source=119.27.173.241;Database=haohaoPlay;User ID=root;Password=Mimashi@7758258;CharSet=utf8;port=3306;sslmode=none";
+        protected static string _connectionString;
 
         protected static IdWorker _worker = new IdWorker(1, 1);
 
@@ -28,9 +32,11 @@ namespace Hao.Hf.DyService
 
         protected static int count = 0; 
 
-        public DyService(IHttpHelper http)
+        public DyService(IHttpHelper http,IConfiguration config)
         {
             _http = http;
+            _config = config;
+            _connectionString = config.GetConnectionString("WriteConnectionString");
         }
 
 
@@ -239,7 +245,7 @@ namespace Hao.Hf.DyService
                 var movieInfo = new Movie()
                 {
                     Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
-                    NameAnother = ps[1].InnerHtml.Substring(6),
+                    NameAnother = ps[1].InnerHtml.Substring(6).Replace("&nbsp;",""),
                     Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
                     Area = ps[4].InnerHtml.Substring(6),
                     Types = ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
