@@ -36,7 +36,7 @@ namespace Hao.Hf.DyService
         {
             _http = http;
             _config = config;
-            _connectionString = config.GetConnectionString("WriteConnectionString");
+            _connectionString = config.GetConnectionString("MySqlConnection");
         }
 
 
