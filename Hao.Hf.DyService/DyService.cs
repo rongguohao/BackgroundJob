@@ -37,7 +37,6 @@ namespace Hao.Hf.DyService
             _connectionString = config.GetConnectionString("MySqlConnection");
         }
 
-
         public async Task PullMovieJustOnce()
         {
             try
