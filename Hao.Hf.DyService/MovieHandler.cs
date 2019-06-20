@@ -76,7 +76,7 @@ namespace Hao.Hf.DyService
                     {
                         releaseDate = match.Groups[0].Value;
                     }
-                    if(string.IsNullOrWhiteSpace(releaseDate))
+                    if (releaseDate.Length == 4) 
                     {
                         releaseDate = year.ToString() + "-01-01";
                     }
