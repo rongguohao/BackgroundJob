@@ -33,132 +33,71 @@ namespace Hao.Hf.DyService
 
                 var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
 
-                string releaseDate = "";
-                string date = ps[8].InnerHtml;
-                string date2 = "";
-                if (ps[8].InnerHtml.Contains("/"))
-                {
-                    date = ps[8].InnerHtml.Split('/')[0];
-                    date2 = ps[8].InnerHtml.Split('/')[1];
-                }
-                foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}-\d{1,2}"))
-                {
-                    releaseDate = match.Groups[0].Value;
-                }
-                if (string.IsNullOrWhiteSpace(releaseDate))
-                {
-                    foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}-\d{1,2}"))
-                    {
-                        releaseDate = match.Groups[0].Value;
-                    }
-                }
-                if (string.IsNullOrWhiteSpace(releaseDate))
-                {
-                    date = ps[7].InnerHtml;
-                    date2 = "";
-                    if (ps[7].InnerHtml.Contains("/"))
-                    {
-                        date = ps[7].InnerHtml.Split('/')[0];
-                        date2 = ps[7].InnerHtml.Split('/')[1];
-                    }
-                    foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}-\d{1,2}"))
-                    {
-                        releaseDate = match.Groups[0].Value;
-                    }
-                    if (string.IsNullOrWhiteSpace(releaseDate))
-                    {
-                        foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}-\d{1,2}"))
-                        {
-                            releaseDate = match.Groups[0].Value;
-                        }
-                    }
-                }
-                if (string.IsNullOrWhiteSpace(releaseDate))
-                {
-                    date = ps[8].InnerHtml;
-                    date2 = "";
-                    if (ps[8].InnerHtml.Contains("/"))
-                    {
-                        date = ps[8].InnerHtml.Split('/')[0];
-                        date2 = ps[8].InnerHtml.Split('/')[1];
-                    }
-                    foreach (Match match in Regex.Matches(date, @"\d{4}-\d{1,2}"))
-                    {
-                        releaseDate = match.Groups[0].Value;
-                    }
-                    if (string.IsNullOrWhiteSpace(releaseDate))
-                    {
-                        foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}"))
-                        {
-                            releaseDate = match.Groups[0].Value;
-                        }
-                    }
-                }
-                if (string.IsNullOrWhiteSpace(releaseDate))
-                {
-                    releaseDate = ps[3].InnerHtml.Substring(6);
-                }
-
-                string directorTag = "导　　演";
-                string director = "";
                 int dIndex = 14;
-                if (ps[14].InnerHtml.Contains(directorTag))
-                {
-                    dIndex = 14;
-                    director = ps[14].InnerHtml.Substring(6);
-                }
-                else if (ps[15].InnerHtml.Contains(directorTag))
-                {
-                    dIndex = 15;
-                    director = ps[15].InnerHtml.Substring(6);
-                }
-                else if (ps[16].InnerHtml.Contains(directorTag))
-                {
-                    dIndex = 16;
-                    director = ps[16].InnerHtml.Substring(6);
-                }
-
                 int cIndex = dIndex + 6;
-                while (!ps[cIndex].InnerHtml.Contains("简　　介"))
+                while (!ps[cIndex].InnerHtml.Contains("◎简　　介"))
                 {
                     cIndex++;
                 }
 
+                #region HtmlString
+
                 var zoomHtml = movieDoc.GetElementById("Zoom").InnerHtml;
+
+                string[] splitFeature = new string[] { "</" };
 
                 var area = "";
                 if (zoomHtml.Contains("◎产　　地"))
                 {
-                    area = zoomHtml.Split(new string[] { "◎产　　地" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                    area = zoomHtml.Split(new string[] { "◎产　　地" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
                 }
                 else if (zoomHtml.Contains("◎国　　家"))
                 {
-                    area = zoomHtml.Split(new string[] { "◎国　　家" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                    area = zoomHtml.Split(new string[] { "◎国　　家" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
                 }
 
-                var nameother = zoomHtml.Split(new string[] { "◎译　　名" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var nameother = zoomHtml.Split(new string[] { "◎译　　名" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
 
-                var types = zoomHtml.Split(new string[] { "◎类　　别" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var types = zoomHtml.Split(new string[] { "◎类　　别" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+
+                var year = HConvert.ToInt(zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim());
+
+                var director = zoomHtml.Split(new string[] { "◎导　　演" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+
+                var releaseDate = zoomHtml.Split(new string[] { "◎上映日期" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                if (!string.IsNullOrWhiteSpace(releaseDate))
+                {
+                    foreach (Match match in Regex.Matches(releaseDate, @"\d{4}-\d{1,2}"))
+                    {
+                        releaseDate = match.Groups[0].Value;
+                    }
+                    if(string.IsNullOrWhiteSpace(releaseDate))
+                    {
+                        releaseDate = year.ToString() + "-01-01";
+                    }
+                }
+                else
+                {
+                    releaseDate = year.ToString() + "-01-01";
+                }
+                #endregion
+
                 var movieInfo = new Movie()
                 {
                     Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
-                    //NameAnother = ps[1].InnerHtml.Substring(6).Replace("&nbsp;", ""),
                     NameAnother = nameother,
-                    //Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
-                    Year = HConvert.ToInt(zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim()),
-                    //Area = ps[4].InnerHtml.Substring(6),
+                    Year = year,
                     Area = area,
-                    //Types = await ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
                     Types = await ConvertTypes(types.Split('/')),
                     ReleaseDate = HConvert.ToDateTime(releaseDate),
                     Score = HConvert.ToFloat(score),
                     Director = director,
                     MainActors = $",{ps[dIndex + 1].InnerHtml.Substring(6)},{ps[dIndex + 2].InnerHtml.Substring(6)},{ps[dIndex + 3].InnerHtml.Substring(6)},{ps[dIndex + 4].InnerHtml.Substring(6)},{ps[dIndex + 5].InnerHtml.Substring(6)},",
-                    CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src"),
-                    Description = ps[cIndex + 1].InnerHtml,
+                    CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src").Trim(),
+                    Description = ps[cIndex + 1].InnerHtml.Replace("&nbsp;", "").Trim(),
                     DownloadUrlFirst = lstDownLoadURL?.FirstOrDefault(),
-                    DownloadUrlSecond = lstDownLoadURL.Count() > 2 && !string.IsNullOrWhiteSpace(lstDownLoadURL[1]) ? lstDownLoadURL[1] : "",
-                    DownloadUrlThird = lstDownLoadURL.Count() > 3 && !string.IsNullOrWhiteSpace(lstDownLoadURL[2]) ? lstDownLoadURL[2] : "",
+                    DownloadUrlSecond = lstDownLoadURL.Count() > 2 && !string.IsNullOrWhiteSpace(lstDownLoadURL[1]) ? lstDownLoadURL[1].Trim() : "",
+                    DownloadUrlThird = lstDownLoadURL.Count() > 3 && !string.IsNullOrWhiteSpace(lstDownLoadURL[2]) ? lstDownLoadURL[2].Trim() : "",
                 };
                 return movieInfo;
             }
