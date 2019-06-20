@@ -33,8 +33,13 @@ namespace Hao.Hf.DyService
 
                 var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
 
-                int dIndex = 14;
-                int cIndex = dIndex + 6;
+                int dIndex = 0;
+                while (!ps[dIndex].InnerHtml.Contains("◎主　　演"))
+                {
+                    dIndex++;
+                }
+
+                int cIndex = 0;
                 while (!ps[cIndex].InnerHtml.Contains("◎简　　介"))
                 {
                     cIndex++;
@@ -92,7 +97,7 @@ namespace Hao.Hf.DyService
                     ReleaseDate = HConvert.ToDateTime(releaseDate),
                     Score = HConvert.ToFloat(score),
                     Director = director,
-                    MainActors = $",{ps[dIndex + 1].InnerHtml.Substring(6)},{ps[dIndex + 2].InnerHtml.Substring(6)},{ps[dIndex + 3].InnerHtml.Substring(6)},{ps[dIndex + 4].InnerHtml.Substring(6)},{ps[dIndex + 5].InnerHtml.Substring(6)},",
+                    MainActors = $",{ps[dIndex].InnerHtml.Substring(6)},{ps[dIndex + 2].InnerHtml.Substring(6)},{ps[dIndex + 3].InnerHtml.Substring(6)},{ps[dIndex + 4].InnerHtml.Substring(6)},{ps[dIndex + 5].InnerHtml.Substring(6)},",
                     CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src").Trim(),
                     Description = ps[cIndex + 1].InnerHtml.Replace("&nbsp;", "").Trim(),
                     DownloadUrlFirst = lstDownLoadURL?.FirstOrDefault(),

@@ -24,19 +24,14 @@ namespace Hao.Hf.DyService
             {
                 var hrefs = divInfo.QuerySelectorAll("a").Where(a => a.GetAttribute("href").Contains("/i/")).ToList();
 
-                foreach(var a in hrefs)
+                foreach (var a in hrefs)
                 {
                     //拼接成完整链接
                     var onlineURL = "http://www.dy2018.com" + a.GetAttribute("href");
 
                     Movie movieInfo = await FillMovieInfoFormWeb(onlineURL);
                     if (movieInfo == null) continue;
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"{num++}电影名称：" + movieInfo.Name);
-                    Console.WriteLine("下载地址：" + movieInfo.DownloadUrlFirst);
                     var success = await InsertDB(movieInfo);
-                    Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
-                    Console.WriteLine(success ? "成功" : "失败");
                 }
             }
         }
