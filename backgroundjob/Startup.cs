@@ -113,7 +113,7 @@ namespace backgroundjob
                 Authorization = new List<IDashboardAuthorizationFilter>() { filter, new DashboardAuthorizationFilter() }
             });
 
-            BackgroundJob.Enqueue<IDyService>(a => a.PullMovieJustOnce());
+            //BackgroundJob.Enqueue<IDyService>(a => a.PullMovieJustOnce());
 
             RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovieTiming(), "0 0 5,15,23 * * ?"); //每天上午5点，下午3点、11点
 
