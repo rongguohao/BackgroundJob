@@ -7,6 +7,8 @@ namespace Hao.Hf.DyService
 {
     public interface IDyService
     {
-        Task PullMovie();
+        Task PullMovieJustOnce();
+
+        Task PullMovieTiming();
     }
 }

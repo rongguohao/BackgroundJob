@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Hao.Hf.DyService
 {
-    public class DyService : IDyService
+    public partial class DyService : IDyService
     {
 
         protected IConfiguration _config { get; }
@@ -24,15 +24,13 @@ namespace Hao.Hf.DyService
 
         protected static HtmlParser htmlParser = new HtmlParser();
 
-        protected static string _connectionString;
+        protected readonly string _connectionString;
 
         protected static IdWorker _worker = new IdWorker(1, 1);
 
         protected static int num = 1;
 
-        protected static int count = 0; 
-
-        public DyService(IHttpHelper http,IConfiguration config)
+        public DyService(IHttpHelper http, IConfiguration config)
         {
             _http = http;
             _config = config;
@@ -40,7 +38,7 @@ namespace Hao.Hf.DyService
         }
 
 
-        public async Task PullMovie()
+        public async Task PullMovieJustOnce()
         {
             try
             {
@@ -62,8 +60,7 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    var flag = await GetMovie(_http, url, dom);
-                    if (!flag) continue;
+                    await GetMovie(url, dom);
 
                     if (pageNum > 0)
                     {
@@ -72,8 +69,7 @@ namespace Hao.Hf.DyService
                             var url2 = "https://www.dy2018.com/" + i + $"/index_{page}.html";
 
                             //获取电影
-                            bool flag2 = await GetMovie(_http, url2);
-                            if (!flag2) continue;
+                            await GetMovie(url2);
                         }
                     }
                 }
@@ -92,19 +88,18 @@ namespace Hao.Hf.DyService
         }
 
 
-        private static async Task<bool> GetMovie(IHttpHelper http, string url, IHtmlDocument dom = null)
+        private async Task GetMovie(string url, IHtmlDocument dom = null)
         {
             if (dom == null)
             {
-                var htmlDoc = await http.GetHtmlByUrl(url);
-                if (string.IsNullOrWhiteSpace(htmlDoc)) return true;
+                var htmlDoc = await _http.GetHtmlByUrl(url);
+                if (string.IsNullOrWhiteSpace(htmlDoc)) return;
                 dom = htmlParser.ParseDocument(htmlDoc);
             }
             var tables = dom.QuerySelectorAll("table.tbspan");
 
             if (tables != null && tables.Count() > 0)
             {
-                count = 0;//初始化0
                 foreach (var tb in tables)
                 {
                     var href = tb.QuerySelectorAll("a").Where(a => a.GetAttribute("href").Contains(".html")).FirstOrDefault();
@@ -112,7 +107,7 @@ namespace Hao.Hf.DyService
                     var onlineURL = "http://www.dy2018.com" + href.GetAttribute("href");
 
 
-                    Movie movieInfo = await FillMovieInfoFormWeb(http, onlineURL);
+                    Movie movieInfo = await FillMovieInfoFormWeb(onlineURL);
                     if (movieInfo == null) continue;
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{num++}电影名称：" + movieInfo.Name);
@@ -120,19 +115,16 @@ namespace Hao.Hf.DyService
                     var success = await InsertDB(movieInfo);
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
-                    if (!success) count++;
-                    if (count > 10) return false;
                 }
             }
-            return true;
         }
 
 
-        private static async Task<Movie> FillMovieInfoFormWeb(IHttpHelper http, string onlineURL)
+        private async Task<Movie> FillMovieInfoFormWeb(string onlineURL)
         {
             try
             {
-                var movieHTML = await http.GetHtmlByUrl(onlineURL);
+                var movieHTML = await _http.GetHtmlByUrl(onlineURL);
                 if (string.IsNullOrWhiteSpace(movieHTML)) return null;
                 var movieDoc = htmlParser.ParseDocument(movieHTML);
 
@@ -163,7 +155,7 @@ namespace Hao.Hf.DyService
                 {
                     releaseDate = match.Groups[0].Value;
                 }
-                if(string.IsNullOrWhiteSpace(releaseDate))
+                if (string.IsNullOrWhiteSpace(releaseDate))
                 {
                     foreach (Match match in Regex.Matches(date2, @"\d{4}-\d{1,2}-\d{1,2}"))
                     {
@@ -245,10 +237,10 @@ namespace Hao.Hf.DyService
                 var movieInfo = new Movie()
                 {
                     Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
-                    NameAnother = ps[1].InnerHtml.Substring(6).Replace("&nbsp;",""),
+                    NameAnother = ps[1].InnerHtml.Substring(6).Replace("&nbsp;", ""),
                     Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
                     Area = ps[4].InnerHtml.Substring(6),
-                    Types = ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
+                    Types = await ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
                     ReleaseDate = HConvert.ToDateTime(releaseDate),
                     Score = HConvert.ToFloat(score),
                     Director = director,
@@ -261,12 +253,10 @@ namespace Hao.Hf.DyService
                 };
                 return movieInfo;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 return null;
             }
-
         }
 
         /// <summary>
@@ -274,7 +264,7 @@ namespace Hao.Hf.DyService
         /// </summary>
         /// <param name="info"></param>
         /// <returns></returns>
-        private static async Task<bool> InsertDB(Movie info)
+        private async Task<bool> InsertDB(Movie info)
         {
             info.ID = _worker.NextId();
             List<string> matchValue = new List<string>();
@@ -308,32 +298,35 @@ namespace Hao.Hf.DyService
         }
 
 
-        private static string ConvertTypes(string[] typeNames)
+        private async Task<string> ConvertTypes(string[] typeNames)
         {
-            string types = "";
-            int index = 0;
-            foreach (var item in typeNames)
-            {
-                var a = HDescription.GetValue(typeof(MovieType), item);
-                if (a == null) continue;
-                int b = (int)a;
-                if (index == 0)
-                {
-                    if (b > 0)
-                    {
-                        types += $",{b},";
-                    }
-                }
-                else
-                {
-                    if (b > 0)
-                    {
-                        types += $"{b},";
-                    }
-                }
-                index++;
-            }
-            return types;
+            return await Task.Factory.StartNew(() =>
+           {
+               string types = "";
+               int index = 0;
+               foreach (var item in typeNames)
+               {
+                   var a = HDescription.GetValue(typeof(MovieType), item);
+                   if (a == null) continue;
+                   int b = (int)a;
+                   if (index == 0)
+                   {
+                       if (b > 0)
+                       {
+                           types += $",{b},";
+                       }
+                   }
+                   else
+                   {
+                       if (b > 0)
+                       {
+                           types += $"{b},";
+                       }
+                   }
+                   index++;
+               }
+               return types;
+           });
         }
     }
 }
