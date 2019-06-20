@@ -234,13 +234,32 @@ namespace Hao.Hf.DyService
                     cIndex++;
                 }
 
+                var zoomHtml =  movieDoc.GetElementById("Zoom").InnerHtml;
+
+                var area = "";
+                if(zoomHtml.Contains("◎产　　地"))
+                {
+                    area = zoomHtml.Split(new string[] { "◎产　　地" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                }
+                else if(zoomHtml.Contains("◎国　　家"))
+                {
+                    area = zoomHtml.Split(new string[] { "◎国　　家" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                }
+
+                var nameother = zoomHtml.Split(new string[] { "◎译　　名" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+
+                var types= zoomHtml.Split(new string[] { "◎类　　别" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
                 var movieInfo = new Movie()
                 {
                     Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
-                    NameAnother = ps[1].InnerHtml.Substring(6).Replace("&nbsp;", ""),
-                    Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
-                    Area = ps[4].InnerHtml.Substring(6),
-                    Types = await ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
+                    //NameAnother = ps[1].InnerHtml.Substring(6).Replace("&nbsp;", ""),
+                    NameAnother = nameother,
+                    //Year = HConvert.ToInt(ps[3].InnerHtml.Substring(6)),
+                    Year = HConvert.ToInt(zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(new string[] { "</p>" }, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim()),
+                    //Area = ps[4].InnerHtml.Substring(6),
+                    Area =area ,
+                    //Types = await ConvertTypes(ps[5].InnerHtml.Substring(6).Split('/')),
+                    Types = await ConvertTypes(types.Split('/')),
                     ReleaseDate = HConvert.ToDateTime(releaseDate),
                     Score = HConvert.ToFloat(score),
                     Director = director,
@@ -306,7 +325,7 @@ namespace Hao.Hf.DyService
                int index = 0;
                foreach (var item in typeNames)
                {
-                   var a = HDescription.GetValue(typeof(MovieType), item);
+                   var a = HDescription.GetValue(typeof(MovieType), item.Trim());
                    if (a == null) continue;
                    int b = (int)a;
                    if (index == 0)
