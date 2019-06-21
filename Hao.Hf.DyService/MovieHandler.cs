@@ -82,10 +82,6 @@ namespace Hao.Hf.DyService
                     {
                         releaseDate = match.Groups[0].Value;
                     }
-                    if (HConvert.ToInt(releaseDate.Substring(0,4)).HasValue) 
-                    {
-                        releaseDate = year.ToString() + "-01-01";
-                    }
                 }
                 if(string.IsNullOrWhiteSpace(releaseDate))
                 {
