@@ -137,7 +137,7 @@ namespace Hao.Hf.DyService
     {
         public static string TrimAll(this string str)
         {
-            return str.TrimAll();
+            return str.Replace("&nbsp;","").Trim();
         }
     }
 }
