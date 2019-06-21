@@ -113,6 +113,16 @@ namespace Hao.Hf.DyService
                 {
                     third = "ftp://" + zoomHtml.Split(new string[] { "ftp://" }, 2, StringSplitOptions.None)[1].Split(new string[] { "<" }, 2, StringSplitOptions.None)[0].TrimAll();
                 }
+
+                var actor = $"{ps[dIndex].InnerHtml.Substring(6).TrimAll()}";
+                var actors = $"{ ps[dIndex].InnerHtml.Substring(6).TrimAll()}";
+                var picture = ps[0].Children.FirstOrDefault().GetAttribute("src").TrimAll();
+                var description = ps[cIndex + 1].InnerHtml.TrimAll();
+                while (dIndex < ps.Count) 
+                {
+                    actors += $",{ ps[dIndex+1].InnerHtml.Substring(6).TrimAll()}";
+                    dIndex++;
+                }
                 #endregion
 
                 var movieInfo = new Movie()
@@ -123,9 +133,10 @@ namespace Hao.Hf.DyService
                     ReleaseDate = date,
                     Score = HConvert.ToFloat(score),
                     Director = director,
-                    MainActors = $",{ps[dIndex].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 1].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 2].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 3].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 4].InnerHtml.Substring(6).TrimAll()},",
-                    CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src").TrimAll(),
-                    Description = ps[cIndex + 1].InnerHtml.TrimAll(),
+                    MainActor = actor,
+                    MainActors = actor,
+                    CoverPicture = picture,
+                    Description = description,
                     DownloadUrlFirst = first,
                     DownloadUrlSecond = second,
                     DownloadUrlThird = third,
@@ -143,8 +154,10 @@ namespace Hao.Hf.DyService
                 }
                 return movieInfo;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(ex.Message);
                 return null;
             }
         }

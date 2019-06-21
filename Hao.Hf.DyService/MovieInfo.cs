@@ -40,6 +40,11 @@ namespace Hao.Hf.DyService
         /// <summary>
         /// 主演
         /// </summary>
+        public string MainActor { get; set; }
+
+        /// <summary>
+        /// 主演
+        /// </summary>
         public string MainActors { get; set; }
 
         /// <summary>

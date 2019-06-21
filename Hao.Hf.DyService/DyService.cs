@@ -99,11 +99,12 @@ namespace Hao.Hf.DyService
 
             if (tables != null && tables.Count() > 0)
             {
+                int count = 1;
                 foreach (var tb in tables)
                 {
-                    var href = tb.QuerySelectorAll("a").Where(a => a.GetAttribute("href").Contains(".html")).FirstOrDefault();
+                    var href = tb.QuerySelectorAll("a").Where(a => a.GetAttribute("href").Contains(".html")).FirstOrDefault().GetAttribute("href");
                     //拼接成完整链接
-                    var onlineURL = "http://www.dy2018.com" + href.GetAttribute("href");
+                    var onlineURL = "http://www.dy2018.com" + href;
 
                     Movie movieInfo = await FillMovieInfoFormWeb(onlineURL);
                     if (movieInfo == null) continue;
@@ -111,7 +112,7 @@ namespace Hao.Hf.DyService
                     Console.WriteLine($"{num++}电影名称：" + movieInfo.Name);
                     if (i.HasValue && page.HasValue) 
                     {
-                        Console.WriteLine("分类：" + i+"页数："+ page);
+                        Console.WriteLine("分类：" + i+"页数："+ page+"个数："+count);
                     }
                     Console.WriteLine("下载地址1：" + movieInfo.DownloadUrlFirst);
                     Console.WriteLine("下载地址2：" + movieInfo.DownloadUrlSecond);
@@ -119,6 +120,7 @@ namespace Hao.Hf.DyService
                     var success = await InsertDB(movieInfo);
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
+                    count++;
                 }
             }
         }
