@@ -24,8 +24,6 @@ namespace dyprogram
 
             IServiceCollection services = new ServiceCollection();
 
-
-
             services.AddSingleton<IConfiguration>(configuration);
             services.AddHttpClient("dy", a => { a.Timeout = TimeSpan.FromMinutes(3); })
                         .AddPolicyHandler(Policy<HttpResponseMessage>
