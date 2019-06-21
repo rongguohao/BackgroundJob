@@ -62,6 +62,9 @@ namespace Hao.Hf.DyService
         MartialArts,
 
         [HDescription("古装")]
-        Costume
+        Costume,
+
+        [HDescription("其他")]
+        Other
     }
 }

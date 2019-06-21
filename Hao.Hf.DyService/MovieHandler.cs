@@ -118,7 +118,14 @@ namespace Hao.Hf.DyService
 
                 movieInfo.Types = await ConvertTypeArea<MType>(types.Split('/'));
                 movieInfo.Areas = await ConvertTypeArea<MArea>(area.Split('/'));
-
+                if (movieInfo.Types.Count < 1)
+                {
+                    movieInfo.Types.Add((int)MType.Other);
+                }
+                if (movieInfo.Areas.Count < 1) 
+                {
+                    movieInfo.Areas.Add((int)MArea.Other);
+                }
                 return movieInfo;
             }
             catch (Exception)

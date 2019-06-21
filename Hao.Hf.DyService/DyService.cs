@@ -148,26 +148,44 @@ namespace Hao.Hf.DyService
 
                 try
                 {
-                    var sql = @"
-                            INSERT INTO Movie (ID,Name,NameAnother,Year,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
-                                       
-                            SELECT @ID,@Name,@NameAnother,@Year,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture From DUAL
+                    //var sql = @"
+                    //        INSERT INTO Movie (ID,Name,NameAnother,Year,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
 
-                            WHERE NOT EXISTS (SELECT 1 FROM Movie where Name = @Name)";
+                    //        SELECT @ID,@Name,@NameAnother,@Year,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture From DUAL
+
+                    //        WHERE NOT EXISTS (SELECT 1 FROM Movie where Name = @Name)";
+
+                    var sql = "SELECT * FROM Movie where Name = @Name";
+                    var movie= dbConnection.QueryFirstOrDefault<Movie>(sql,new { info.Name});
+                    if (movie != null && movie.ID.HasValue) 
+                    {
+                        transaction.Commit();
+                        return false;
+                    }
+
+                    sql = @"
+                            INSERT INTO Movie (ID,Name,NameAnother,Year,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
+
+                            VALUES( @ID,@Name,@NameAnother,@Year,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture)";
 
                     var res = await dbConnection.ExecuteAsync(sql, info);
                     bool flag = res > 0;
                     if (flag) 
                     {
-                        sql = "INSERT INTO MovieType (ID,MID,MType) Values(@ID,@MID,@MType)";
+                        if(types.Count>0)
+                        {
+                            sql = "INSERT INTO MovieType (ID,MID,MType) Values(@ID,@MID,@MType)";
 
-                        var a=await dbConnection.ExecuteAsync(sql, types);
-                        flag = flag && a > 0;
+                            var a = await dbConnection.ExecuteAsync(sql, types);
+                            flag = flag && a > 0;
+                        }
+                        if(areas.Count>0)
+                        {
+                            sql = "INSERT INTO MovieArea (ID,MID,MArea) Values(@ID,@MID,@MArea)";
 
-                        sql = "INSERT INTO MovieArea (ID,MID,MArea) Values(@ID,@MID,@MArea)";
-
-                        var b = await dbConnection.ExecuteAsync(sql, areas);
-                        flag = flag && b > 0;
+                            var b = await dbConnection.ExecuteAsync(sql, areas);
+                            flag = flag && b > 0;
+                        }
                     }
                     if(flag)
                     {
@@ -179,8 +197,10 @@ namespace Hao.Hf.DyService
                     }
                     return flag;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex.Message);
                     transaction.Rollback();
                     return false;
                 }    
