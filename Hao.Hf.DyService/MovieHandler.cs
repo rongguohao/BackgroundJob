@@ -65,7 +65,9 @@ namespace Hao.Hf.DyService
 
                 var types = zoomHtml.Split(new string[] { "◎类　　别" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
 
-                var year = HConvert.ToInt(zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim());
+
+                var yearStr = zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var year = HConvert.ToInt(yearStr.Substring(0,4));
 
                 var director = zoomHtml.Split(new string[] { "◎导　　演" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
 
