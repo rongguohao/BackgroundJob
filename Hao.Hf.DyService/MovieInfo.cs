@@ -21,15 +21,6 @@ namespace Hao.Hf.DyService
         /// </summary>
         public string NameAnother { get; set; }
 
-        /// <summary>
-        /// 电影类型
-        /// </summary>
-        public string Types { get; set; }
-
-        /// <summary>
-        /// 电影地区
-        /// </summary>
-        public string Area { get; set; }
 
         /// <summary>
         /// 年代
@@ -135,5 +126,9 @@ namespace Hao.Hf.DyService
 
         public string Creator { get; set; }
 
+
+        public List<int> Types { get; set; }
+
+        public List<int> Areas { get; set; }
     }
 }

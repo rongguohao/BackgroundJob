@@ -91,15 +91,24 @@ namespace Hao.Hf.DyService
                 {
                     releaseDate = year.ToString() + "-01-01";
                 }
+
+                var name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml.TrimAll();
+                List<string> matchValue = new List<string>();
+                foreach (Match m in Regex.Matches(name, "(?<=《)[^》]+(?=》)"))
+                {
+                    matchValue.Add(m.Value);
+                }
+                if (matchValue.Count > 0)
+                {
+                    name = matchValue.FirstOrDefault();
+                }
                 #endregion
 
                 var movieInfo = new Movie()
                 {
-                    Name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml,
+                    Name = name,
                     NameAnother = nameother,
                     Year = year,
-                    Area = area,
-                    Types = await ConvertTypes(types.Split('/')),
                     ReleaseDate = HConvert.ToDateTime(releaseDate),
                     Score = HConvert.ToFloat(score),
                     Director = director,
@@ -110,6 +119,10 @@ namespace Hao.Hf.DyService
                     DownloadUrlSecond = lstDownLoadURL.Count() > 2 && !string.IsNullOrWhiteSpace(lstDownLoadURL[1]) ? lstDownLoadURL[1].Trim() : "",
                     DownloadUrlThird = lstDownLoadURL.Count() > 3 && !string.IsNullOrWhiteSpace(lstDownLoadURL[2]) ? lstDownLoadURL[2].Trim() : "",
                 };
+
+                movieInfo.Types = await ConvertTypeArea<MType>(types.Split('/'));
+                movieInfo.Areas = await ConvertTypeArea<MArea>(area.Split('/'));
+
                 return movieInfo;
             }
             catch (Exception)

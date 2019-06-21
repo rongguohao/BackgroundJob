@@ -105,7 +105,6 @@ namespace Hao.Hf.DyService
                     //拼接成完整链接
                     var onlineURL = "http://www.dy2018.com" + href.GetAttribute("href");
 
-
                     Movie movieInfo = await FillMovieInfoFormWeb(onlineURL);
                     if (movieInfo == null) continue;
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -126,65 +125,83 @@ namespace Hao.Hf.DyService
         private async Task<bool> InsertDB(Movie info)
         {
             info.ID = _worker.NextId();
-            List<string> matchValue = new List<string>();
-            foreach (Match m in Regex.Matches(info.Name, "(?<=《)[^》]+(?=》)"))
-            {
-                matchValue.Add(m.Value);
-            }
-            if (matchValue.Count > 0)
-            {
-                info.Name = matchValue.FirstOrDefault();
-            }
+
             info.CreatorID = -1;
             info.CreateTime = DateTime.Now;
             info.Creator = "系统";
             info.IsDeleted = false;
+            List<MovieType> types = new List<MovieType>();
+            foreach(var item in info.Types)
+            {
+                types.Add(new MovieType() { ID = _worker.NextId(), MID = info.ID, MType = item });
+            }
+            List<MovieArea> areas = new List<MovieArea>();
+            foreach (var item in info.Areas)
+            {
+                areas.Add(new MovieArea() { ID = _worker.NextId(), MID = info.ID, MArea = item });
+            }
             using (IDbConnection dbConnection = new MySqlConnection(_connectionString))
             {
                 dbConnection.Open();
 
-                var sql = @"
-                            INSERT INTO Movie (ID,Name,NameAnother,Year,Area,Types,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
+                IDbTransaction transaction = dbConnection.BeginTransaction();
+
+                try
+                {
+                    var sql = @"
+                            INSERT INTO Movie (ID,Name,NameAnother,Year,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
                                        
-                            SELECT @ID,@Name,@NameAnother,@Year,@Area,@Types,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture From DUAL
+                            SELECT @ID,@Name,@NameAnother,@Year,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture From DUAL
 
                             WHERE NOT EXISTS (SELECT 1 FROM Movie where Name = @Name)";
 
-                var res = await dbConnection.ExecuteAsync(sql, info);
+                    var res = await dbConnection.ExecuteAsync(sql, info);
+                    bool flag = res > 0;
+                    if (flag) 
+                    {
+                        sql = "INSERT INTO MovieType (ID,MID,MType) Values(@ID,@MID,@MType)";
 
-                return res > 0;
+                        var a=await dbConnection.ExecuteAsync(sql, types);
+                        flag = flag && a > 0;
+
+                        sql = "INSERT INTO MovieArea (ID,MID,MArea) Values(@ID,@MID,@MArea)";
+
+                        var b = await dbConnection.ExecuteAsync(sql, areas);
+                        flag = flag && b > 0;
+                    }
+                    if(flag)
+                    {
+                        transaction.Commit();
+                    }
+                    else
+                    {
+                        transaction.Rollback();
+                    }
+                    return flag;
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    return false;
+                }    
             }
         }
 
 
-        private async Task<string> ConvertTypes(string[] typeNames)
+        private async Task<List<int>> ConvertTypeArea<T>(string[] typeNames) where T : struct, IConvertible
         {
             return await Task.Factory.StartNew(() =>
            {
-               string types = "";
-               int index = 0;
+               List<int> list = new List<int>();
+
                foreach (var item in typeNames)
                {
-                   var a = HDescription.GetValue(typeof(MovieType), item.TrimAll());
+                   var a = HDescription.GetValue(typeof(T), item.TrimAll());
                    if (a == null) continue;
                    int b = (int)a;
-                   if (index == 0)
-                   {
-                       if (b > 0)
-                       {
-                           types += $",{b},";
-                       }
-                   }
-                   else
-                   {
-                       if (b > 0)
-                       {
-                           types += $"{b},";
-                       }
-                   }
-                   index++;
+                   list.Add(b);
                }
-               return types;
+               return list;
            });
         }
     }
