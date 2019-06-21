@@ -31,7 +31,7 @@ namespace Hao.Hf.DyService
                     ps.AddRange(divs);
                 }
 
-                var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
+                //var lstDownLoadURL = movieDoc.QuerySelectorAll("td > a").Where(a => !a.GetAttribute("href").Contains(".html")).Select(a => a.InnerHtml).ToList();
 
                 int dIndex = 0;
                 while (!ps[dIndex].InnerHtml.Contains("◎主　　演"))
@@ -99,6 +99,20 @@ namespace Hao.Hf.DyService
                 {
                     name = matchValue.FirstOrDefault();
                 }
+                string[] splitUrl = new string[] { "\"" };
+                string first = null, second = null, third = null;
+                if(zoomHtml.Contains("\"thunder://"))
+                {
+                    first = "thunder://" + zoomHtml.Split(new string[] { "\thunder://" }, 2, StringSplitOptions.None)[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
+                }
+                if (zoomHtml.Contains("\"magnet:?"))
+                {
+                    second = "magnet:?" + zoomHtml.Split(new string[] { "\"magnet:?" }, 2, StringSplitOptions.None)[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
+                }
+                if (zoomHtml.Contains("ftp://"))
+                {
+                    third = "ftp://" + zoomHtml.Split(new string[] { "ftp://" }, 2, StringSplitOptions.None)[1].Split(new string[] { "<" }, 2, StringSplitOptions.None)[0].TrimAll();
+                }
                 #endregion
 
                 var movieInfo = new Movie()
@@ -112,9 +126,9 @@ namespace Hao.Hf.DyService
                     MainActors = $",{ps[dIndex].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 1].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 2].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 3].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 4].InnerHtml.Substring(6).TrimAll()},",
                     CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src").TrimAll(),
                     Description = ps[cIndex + 1].InnerHtml.TrimAll(),
-                    DownloadUrlFirst = lstDownLoadURL?.FirstOrDefault(),
-                    DownloadUrlSecond = lstDownLoadURL.Count() > 2 && !string.IsNullOrWhiteSpace(lstDownLoadURL[1]) ? lstDownLoadURL[1].Trim() : "",
-                    DownloadUrlThird = lstDownLoadURL.Count() > 3 && !string.IsNullOrWhiteSpace(lstDownLoadURL[2]) ? lstDownLoadURL[2].Trim() : "",
+                    DownloadUrlFirst = first,
+                    DownloadUrlSecond = second,
+                    DownloadUrlThird = third,
                 };
 
                 movieInfo.Types = await ConvertTypeArea<MType>(types.Split('/'));

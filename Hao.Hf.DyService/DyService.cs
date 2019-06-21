@@ -109,7 +109,9 @@ namespace Hao.Hf.DyService
                     if (movieInfo == null) continue;
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{num++}电影名称：" + movieInfo.Name);
-                    Console.WriteLine("下载地址：" + movieInfo.DownloadUrlFirst);
+                    Console.WriteLine("下载地址1：" + movieInfo.DownloadUrlFirst);
+                    Console.WriteLine("下载地址2：" + movieInfo.DownloadUrlSecond);
+                    Console.WriteLine("下载地址3：" + movieInfo.DownloadUrlThird);
                     var success = await InsertDB(movieInfo);
                     Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
                     Console.WriteLine(success ? "成功" : "失败");
