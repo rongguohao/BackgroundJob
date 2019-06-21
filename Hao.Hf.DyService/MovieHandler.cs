@@ -83,9 +83,10 @@ namespace Hao.Hf.DyService
                         releaseDate = match.Groups[0].Value;
                     }
                 }
-                if(string.IsNullOrWhiteSpace(releaseDate))
+                var date = HConvert.ToDateTime(releaseDate);
+                if (!date.HasValue)
                 {
-                    releaseDate = year.ToString() + "-01-01";
+                    date = HConvert.ToDateTime(year.ToString() + "-01-01");
                 }
 
                 var name = movieDoc.QuerySelectorAll("div.title_all > h1").FirstOrDefault().InnerHtml.TrimAll();
@@ -105,7 +106,7 @@ namespace Hao.Hf.DyService
                     Name = name,
                     NameAnother = nameother,
                     Year = year,
-                    ReleaseDate = HConvert.ToDateTime(releaseDate),
+                    ReleaseDate = date,
                     Score = HConvert.ToFloat(score),
                     Director = director,
                     MainActors = $",{ps[dIndex].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 1].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 2].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 3].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 4].InnerHtml.Substring(6).TrimAll()},",
