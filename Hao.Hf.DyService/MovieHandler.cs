@@ -82,12 +82,12 @@ namespace Hao.Hf.DyService
                     {
                         releaseDate = match.Groups[0].Value;
                     }
-                    if (releaseDate.Length == 4) 
+                    if (HConvert.ToInt(releaseDate.Substring(0,4)).HasValue) 
                     {
                         releaseDate = year.ToString() + "-01-01";
                     }
                 }
-                else
+                if(string.IsNullOrWhiteSpace(releaseDate))
                 {
                     releaseDate = year.ToString() + "-01-01";
                 }
