@@ -18,7 +18,7 @@ namespace Hao.Hf.DyService
                 if (string.IsNullOrWhiteSpace(movieHTML)) return null;
                 var movieDoc = htmlParser.ParseDocument(movieHTML);
 
-                var score = movieDoc.QuerySelector("strong.rank").InnerHtml;
+                var score = movieDoc.QuerySelector("strong.rank").InnerHtml.TrimAll();
                 //电影的详细介绍 在id为Zoom的标签中
                 var zoom = movieDoc.GetElementById("Zoom");
 
@@ -54,24 +54,28 @@ namespace Hao.Hf.DyService
                 var area = "";
                 if (zoomHtml.Contains("◎产　　地"))
                 {
-                    area = zoomHtml.Split(new string[] { "◎产　　地" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                    area = zoomHtml.Split(new string[] { "◎产　　地" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                 }
                 else if (zoomHtml.Contains("◎国　　家"))
                 {
-                    area = zoomHtml.Split(new string[] { "◎国　　家" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                    area = zoomHtml.Split(new string[] { "◎国　　家" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
+                }
+                else if (zoomHtml.Contains("◎地　　区"))
+                {
+                    area = zoomHtml.Split(new string[] { "◎地　　区" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                 }
 
-                var nameother = zoomHtml.Split(new string[] { "◎译　　名" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var nameother = zoomHtml.Split(new string[] { "◎译　　名" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
 
-                var types = zoomHtml.Split(new string[] { "◎类　　别" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var types = zoomHtml.Split(new string[] { "◎类　　别" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
 
 
-                var yearStr = zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var yearStr = zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                 var year = HConvert.ToInt(yearStr.Substring(0,4));
 
-                var director = zoomHtml.Split(new string[] { "◎导　　演" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var director = zoomHtml.Split(new string[] { "◎导　　演" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
 
-                var releaseDate = zoomHtml.Split(new string[] { "◎上映日期" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].Replace("&nbsp;", "").Trim();
+                var releaseDate = zoomHtml.Split(new string[] { "◎上映日期" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                 if (!string.IsNullOrWhiteSpace(releaseDate))
                 {
                     foreach (Match match in Regex.Matches(releaseDate, @"\d{4}-\d{1,2}"))
@@ -99,9 +103,9 @@ namespace Hao.Hf.DyService
                     ReleaseDate = HConvert.ToDateTime(releaseDate),
                     Score = HConvert.ToFloat(score),
                     Director = director,
-                    MainActors = $",{ps[dIndex].InnerHtml.Substring(6)},{ps[dIndex + 2].InnerHtml.Substring(6)},{ps[dIndex + 3].InnerHtml.Substring(6)},{ps[dIndex + 4].InnerHtml.Substring(6)},{ps[dIndex + 5].InnerHtml.Substring(6)},",
-                    CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src").Trim(),
-                    Description = ps[cIndex + 1].InnerHtml.Replace("&nbsp;", "").Trim(),
+                    MainActors = $",{ps[dIndex].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 1].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 2].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 3].InnerHtml.Substring(6).TrimAll()},{ps[dIndex + 4].InnerHtml.Substring(6).TrimAll()},",
+                    CoverPicture = ps[0].Children.FirstOrDefault().GetAttribute("src").TrimAll(),
+                    Description = ps[cIndex + 1].InnerHtml.TrimAll(),
                     DownloadUrlFirst = lstDownLoadURL?.FirstOrDefault(),
                     DownloadUrlSecond = lstDownLoadURL.Count() > 2 && !string.IsNullOrWhiteSpace(lstDownLoadURL[1]) ? lstDownLoadURL[1].Trim() : "",
                     DownloadUrlThird = lstDownLoadURL.Count() > 3 && !string.IsNullOrWhiteSpace(lstDownLoadURL[2]) ? lstDownLoadURL[2].Trim() : "",
@@ -113,6 +117,14 @@ namespace Hao.Hf.DyService
                 return null;
             }
         }
+    }
 
+
+    public static class StringExtensions
+    {
+        public static string TrimAll(this string str)
+        {
+            return str.TrimAll();
+        }
     }
 }

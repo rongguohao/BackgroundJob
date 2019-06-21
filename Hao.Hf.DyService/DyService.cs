@@ -165,7 +165,7 @@ namespace Hao.Hf.DyService
                int index = 0;
                foreach (var item in typeNames)
                {
-                   var a = HDescription.GetValue(typeof(MovieType), item.Trim());
+                   var a = HDescription.GetValue(typeof(MovieType), item.TrimAll());
                    if (a == null) continue;
                    int b = (int)a;
                    if (index == 0)
