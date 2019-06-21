@@ -59,7 +59,7 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    await GetMovie(url, dom);
+                    await GetMovie(url, dom,i+1,1);
 
                     if (pageNum > 0)
                     {
@@ -68,7 +68,7 @@ namespace Hao.Hf.DyService
                             var url2 = "https://www.dy2018.com/" + i + $"/index_{page}.html";
 
                             //获取电影
-                            await GetMovie(url2);
+                            await GetMovie(url2,null,i,page);
                         }
                     }
                 }
@@ -87,7 +87,7 @@ namespace Hao.Hf.DyService
         }
 
 
-        private async Task GetMovie(string url, IHtmlDocument dom = null)
+        private async Task GetMovie(string url, IHtmlDocument dom = null,int? i=null,int? page=null)
         {
             if (dom == null)
             {
@@ -109,6 +109,10 @@ namespace Hao.Hf.DyService
                     if (movieInfo == null) continue;
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{num++}电影名称：" + movieInfo.Name);
+                    if (i.HasValue && page.HasValue) 
+                    {
+                        Console.WriteLine("分类：" + i+"页数："+ page);
+                    }
                     Console.WriteLine("下载地址1：" + movieInfo.DownloadUrlFirst);
                     Console.WriteLine("下载地址2：" + movieInfo.DownloadUrlSecond);
                     Console.WriteLine("下载地址3：" + movieInfo.DownloadUrlThird);
