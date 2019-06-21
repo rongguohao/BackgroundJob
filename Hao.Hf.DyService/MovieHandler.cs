@@ -49,7 +49,7 @@ namespace Hao.Hf.DyService
 
                 var zoomHtml = movieDoc.GetElementById("Zoom").InnerHtml;
 
-                string[] splitFeature = new string[] { "</" };
+                string[] splitFeature = new string[] { "<" };
 
                 var area = "";
                 if (zoomHtml.Contains("◎产　　地"))
