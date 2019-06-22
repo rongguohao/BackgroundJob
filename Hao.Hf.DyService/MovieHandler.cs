@@ -118,10 +118,15 @@ namespace Hao.Hf.DyService
                 var actors = $"{ ps[dIndex].InnerHtml.Substring(6).TrimAll()}";
                 var picture = ps[0].Children.FirstOrDefault().GetAttribute("src").TrimAll();
                 var description = ps[cIndex + 1].InnerHtml.TrimAll();
-                while (dIndex < ps.Count) 
+                int k = 1;
+                while (dIndex+1 < ps.Count-1 && k <= 5) 
                 {
-                    actors += $",{ ps[dIndex+1].InnerHtml.Substring(6).TrimAll()}";
+                    var innerhtml = ps[dIndex + 1].InnerHtml;
+                    if (innerhtml.Contains("◎简　　介"))
+                        break;
+                    actors += $",{ innerhtml.Substring(6).TrimAll()}";
                     dIndex++;
+                    k++;
                 }
                 #endregion
 
