@@ -68,7 +68,7 @@ namespace Hao.Hf.DyService
                             var url2 = "https://www.dy2018.com/" + i + $"/index_{page}.html";
 
                             //获取电影
-                            await GetMovie(url2,null,i,page);
+                            await GetMovie(url2,null,i+1,page);
                         }
                     }
                 }
