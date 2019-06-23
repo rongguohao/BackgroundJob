@@ -40,10 +40,13 @@ namespace Hao.Hf.DyService
             var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
-                var t = await response.Content.ReadAsByteArrayAsync();
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                var ret = System.Text.Encoding.GetEncoding("GB2312").GetString(t);
-                return ret;
+                if(response.StatusCode!=System.Net.HttpStatusCode.NotFound)
+                {
+                    var t = await response.Content.ReadAsByteArrayAsync();
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    var ret = System.Text.Encoding.GetEncoding("GB2312").GetString(t);
+                    return ret;
+                }
             }
             return string.Empty;
         }

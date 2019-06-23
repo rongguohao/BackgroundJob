@@ -59,7 +59,7 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    await GetMovie(url, dom,i+1,1);
+                    await GetMovie(url, dom, i + 1, 1);
 
                     if (pageNum > 0)
                     {
@@ -118,8 +118,21 @@ namespace Hao.Hf.DyService
                     Console.WriteLine("下载地址2：" + movieInfo.DownloadUrlSecond);
                     Console.WriteLine("下载地址3：" + movieInfo.DownloadUrlThird);
                     var success = await InsertDB(movieInfo);
-                    Console.ForegroundColor = success ? ConsoleColor.Yellow : ConsoleColor.Blue;
-                    Console.WriteLine(success ? "成功" : "失败");
+                    if(success==1)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine("失败：已存在");
+                    }
+                    else if(success==2)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("成功");
+                    }
+                    else if(success==3)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("失败");
+                    }
                     count++;
                 }
             }
@@ -130,7 +143,7 @@ namespace Hao.Hf.DyService
         /// </summary>
         /// <param name="info"></param>
         /// <returns></returns>
-        private async Task<bool> InsertDB(Movie info)
+        private async Task<int> InsertDB(Movie info)
         {
             info.ID = _worker.NextId();
 
@@ -139,15 +152,23 @@ namespace Hao.Hf.DyService
             info.Creator = "系统";
             info.IsDeleted = false;
             List<MovieType> types = new List<MovieType>();
-            foreach(var item in info.Types)
+            if(info.Types!=null)
             {
-                types.Add(new MovieType() { ID = _worker.NextId(), MID = info.ID, MType = item });
+                foreach (var item in info.Types)
+                {
+                    types.Add(new MovieType() { ID = _worker.NextId(), MID = info.ID, MType = item });
+                }
             }
+
             List<MovieArea> areas = new List<MovieArea>();
-            foreach (var item in info.Areas)
+            if(info.Areas!=null)
             {
-                areas.Add(new MovieArea() { ID = _worker.NextId(), MID = info.ID, MArea = item });
+                foreach (var item in info.Areas)
+                {
+                    areas.Add(new MovieArea() { ID = _worker.NextId(), MID = info.ID, MArea = item });
+                }
             }
+ 
             using (IDbConnection dbConnection = new MySqlConnection(_connectionString))
             {
                 dbConnection.Open();
@@ -168,13 +189,13 @@ namespace Hao.Hf.DyService
                     if (movie != null && movie.ID.HasValue) 
                     {
                         transaction.Commit();
-                        return false;
+                        return 1;
                     }
 
                     sql = @"
-                            INSERT INTO Movie (ID,Name,NameAnother,Year,ReleaseDate,Score,Director,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
+                            INSERT INTO Movie (ID,Name,NameAnother,Year,ReleaseDate,Score,Director,MainActor,MainActors,Description,DownloadUrlFirst,DownloadUrlSecond,DownloadUrlThird,CreateTime,CreatorID,IsDeleted,Creator,CoverPicture)  
 
-                            VALUES( @ID,@Name,@NameAnother,@Year,@ReleaseDate,@Score,@Director,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture)";
+                            VALUES( @ID,@Name,@NameAnother,@Year,@ReleaseDate,@Score,@Director,@MainActor,@MainActors,@Description,@DownloadUrlFirst,@DownloadUrlSecond,@DownloadUrlThird,@CreateTime,@CreatorID,@IsDeleted,@Creator,@CoverPicture)";
 
                     var res = await dbConnection.ExecuteAsync(sql, info);
                     bool flag = res > 0;
@@ -203,14 +224,14 @@ namespace Hao.Hf.DyService
                     {
                         transaction.Rollback();
                     }
-                    return flag;
+                    return 2;
                 }
                 catch (Exception ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(ex.Message);
                     transaction.Rollback();
-                    return false;
+                    return 3;
                 }    
             }
         }
