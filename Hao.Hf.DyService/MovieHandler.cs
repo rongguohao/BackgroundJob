@@ -118,11 +118,22 @@ namespace Hao.Hf.DyService
                     var nameother = zoomHtml.Split(new string[] { "◎又　　名" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                     movieInfo.NameAnother = nameother;
                 }
+                if (zoomHtml.Contains("◎中文译名"))
+                {
+                    var nameother = zoomHtml.Split(new string[] { "◎中文译名" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
+                    movieInfo.NameAnother = nameother;
+                }
 
                 string yearStr = null;
                 if (zoomHtml.Contains("◎年　　代"))
                 {
                     yearStr = zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
+                    var year = HConvert.ToInt(yearStr.Substring(0, 4));
+                    movieInfo.Year = year;
+                }
+                if (zoomHtml.Contains("◎出品年代"))
+                {
+                    yearStr = zoomHtml.Split(new string[] { "◎出品年代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                     var year = HConvert.ToInt(yearStr.Substring(0, 4));
                     movieInfo.Year = year;
                 }
@@ -144,6 +155,7 @@ namespace Hao.Hf.DyService
                
                 if (!string.IsNullOrWhiteSpace(releaseDate))
                 {
+                    releaseDate = releaseDate.Replace("月", "-").Replace("日", "-");
                     foreach (Match match in Regex.Matches(releaseDate, @"\d{4}-\d{1,2}"))
                     {
                         releaseDate = match.Groups[0].Value;
@@ -156,31 +168,81 @@ namespace Hao.Hf.DyService
                 }
                 movieInfo.ReleaseDate = date;
 
-
-                if(brs.Count>10)
+                if(zoomHtml.Contains("◎主　　演")|| zoomHtml.Contains("◎演　　员"))
                 {
-                    if(zoomHtml.Contains("◎主　　演")&& zoomHtml.Contains("◎简"))
+                    var splitY = new List<string>();
+                    if (zoomHtml.Contains("◎主　　演"))
                     {
-                        var actor = zoomHtml.Split(new string[] { "◎主　　演" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
-                        var actors = zoomHtml.Split(new string[] { "◎主　　演" }, 2, StringSplitOptions.None)[1].Split(new string[] { "◎简" }, 2, StringSplitOptions.None)[0].TrimAll();
-                        actors = actors.Replace("<br>", ",").Replace("　", "");
-                        movieInfo.MainActor = actor;
-                        movieInfo.MainActors = actors;
+                        splitY.Add("◎主　　演");
                     }
+                    else if (zoomHtml.Contains("◎演　　员"))
+                    {
+                        splitY.Add("◎演　　员");
+                    }
+                    var actor = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
 
-                    if(zoomHtml.Contains("◎演　　员") && zoomHtml.Contains("◎简"))
+                    if (zoomHtml.Contains("◎简") || zoomHtml.Contains("◎剧情介绍") || zoomHtml.Contains("◎内容简介"))
                     {
-                        var actor = zoomHtml.Split(new string[] { "◎演　　员" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
-                        var actors = zoomHtml.Split(new string[] { "◎演　　员" }, 2, StringSplitOptions.None)[1].Split(new string[] { "◎简" }, 2, StringSplitOptions.None)[0].TrimAll();
-                        actors = actors.Replace("<br>", ",").Replace("　", "");
-                        movieInfo.MainActor = actor;
-                        movieInfo.MainActors = actors;
+                        var split = new List<string>();
+                        if (zoomHtml.Contains("◎简"))
+                        {
+                            split.Add("◎简");
+                        }
+                        else if (zoomHtml.Contains("◎剧情"))
+                        {
+                            split.Add("◎剧情");
+                        }
+                        else if (zoomHtml.Contains("◎内容简介"))
+                        {
+                            split.Add("◎内容简介");
+                        }
+                        var actors = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(split.ToArray(), 2, StringSplitOptions.None)[0].TrimAll();
+                        actors = actors.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
+                        movieInfo.MainActor = actor.Replace("\r", "").Replace("\n", "");
+                        movieInfo.MainActors = actors.Replace("\r", "").Replace("\n", "");
+
+                        var html = zoomHtml.Split(split.ToArray(), 2, StringSplitOptions.None)[1];
+                        if (html.Contains("◎") || html.Contains("一句话评论")||html.Contains("幕后制作") || html.Contains("幕后故事")||html.Contains("幕后：")) 
+                        {
+                            var spt = new List<string>();
+                            if(html.Contains("◎"))
+                            {
+                                spt.Add("◎");
+                            }
+                            else if(html.Contains("一句话评论"))
+                            {
+                                spt.Add("一句话评论");
+                            }
+                            else if (html.Contains("幕后制作"))
+                            {
+                                spt.Add("幕后制作");
+                            }
+                            else if (html.Contains("幕后故事"))
+                            {
+                                spt.Add("幕后故事");
+                            }
+                            else if (html.Contains("幕后："))
+                            {
+                                spt.Add("幕后：");
+                            }
+                            else
+                            {
+                                spt.Add("<img");
+                            }
+                            var htmldes = html.Split(spt.ToArray(),2,StringSplitOptions.None)[0].TrimAll().Replace("\r", "").Replace("\n", "").Trim(',');
+                            htmldes = htmldes.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
+      
+                            if(htmldes.Substring(0,4)== "介 , ")
+                            {
+                                htmldes = htmldes.Substring(4);
+                            }
+                            else if (htmldes.Substring(0, 2) == "介,")
+                            {
+                                htmldes = htmldes.Substring(2);
+                            }
+                            movieInfo.Description = htmldes.Trim(',').Trim(' ');
+                        }
                     }
-                }
-                else
-                {
-                    await Do(zoomHtml, ps, movieInfo, "◎主　　演");
-                    await Do(zoomHtml,ps,movieInfo,"◎演　　员");
                 }
 
 
@@ -224,50 +286,6 @@ namespace Hao.Hf.DyService
                 Console.WriteLine(ex.StackTrace);
                 Console.WriteLine(onlineURL);
                 return null;
-            }
-        }
-
-
-        private async Task Do(string zoomHtml, List<IElement> ps, Movie movieInfo,string tag)
-        {
-            if (zoomHtml.Contains(tag))
-            {
-                int dIndex = 0;
-                while (!ps[dIndex].InnerHtml.Contains(tag))
-                {
-                    dIndex++;
-                }
-
-                int cIndex = 0;
-                while (!ps[cIndex].InnerHtml.Contains("◎简") && !ps[cIndex].InnerHtml.Contains("◎剧情介绍") && !ps[cIndex].InnerHtml.Contains("◎内容简介"))
-                {
-                    cIndex++;
-                }
-                var actor = $"{ps[dIndex].InnerHtml.Substring(6).TrimAll()}";
-                movieInfo.MainActor = actor;
-                var actors = $"{ ps[dIndex].InnerHtml.Substring(6).TrimAll()}";
-
-
-                int k = 1;
-                while (dIndex + 1 < ps.Count - 1 && k <= 5)
-                {
-                    var innerhtml = ps[dIndex + 1].InnerHtml;
-                    if (innerhtml.Contains("◎简") || innerhtml.Contains("◎剧情介绍") || innerhtml.Contains("◎内容简介"))
-                        break;
-                    actors += $",{ innerhtml.Substring(6).TrimAll()}";
-                    dIndex++;
-                    k++;
-                }
-                movieInfo.MainActors = actors;
-
-
-                var description = ps[cIndex + 1].InnerHtml.TrimAll();
-                movieInfo.Description = description;
-                if(string.IsNullOrWhiteSpace(description))
-                {
-                    description = ps[cIndex + 2].InnerHtml.TrimAll();
-                    movieInfo.Description = description;
-                }
             }
         }
     }
