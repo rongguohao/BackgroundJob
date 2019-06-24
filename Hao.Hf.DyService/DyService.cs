@@ -118,23 +118,26 @@ namespace Hao.Hf.DyService
                     Console.WriteLine("下载地址1：" + movieInfo.DownloadUrlFirst);
                     Console.WriteLine("下载地址2：" + movieInfo.DownloadUrlSecond);
                     Console.WriteLine("下载地址3：" + movieInfo.DownloadUrlThird);
-                    var success = await InsertDB(movieInfo);
-                    if(success==1)
+                    if(!string.IsNullOrWhiteSpace(movieInfo.Name))
                     {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("失败：已存在");
+                        var success = await InsertDB(movieInfo);
+                        if (success == 1)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                            Console.WriteLine("失败：已存在");
+                        }
+                        else if (success == 2)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("成功");
+                        }
+                        else if (success == 3)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("失败");
+                        }
+                        count++;
                     }
-                    else if(success==2)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("成功");
-                    }
-                    else if(success==3)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("失败");
-                    }
-                    count++;
                 }
             }
         }

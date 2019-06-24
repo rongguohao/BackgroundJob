@@ -240,6 +240,7 @@ namespace Hao.Hf.DyService
                             htmldes = htmldes.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
 
 
+                            htmldes = htmldes.NoHTML().Trim(',').Trim();
                             if (html.Length >= 4 && htmldes.Substring(0, 4) == "介 , ") 
                             {
                                 htmldes = htmldes.Substring(4);
@@ -252,11 +253,7 @@ namespace Hao.Hf.DyService
                             {
                                 htmldes = htmldes.Substring(1);
                             }
-                            movieInfo.Description = htmldes.Trim(',').Trim(' ').Replace("<span style=\"color: rgb(255, 255, 255);\">", "")
-                                                                               .Replace("</span>", "")
-                                                                               .Replace("dygod.net", "").Replace("www.dy2018.com", "")
-                                                                               .Replace("<span style=\"font-size: 14px;\">", "")
-                                                                               .Replace("<span style=\"color: rgb(0, 0, 0);\">", "");
+                            movieInfo.Description = htmldes.NoHTML().Trim(',').Trim().Trim(',');
                         }
                     }
                 }
@@ -337,6 +334,33 @@ namespace Hao.Hf.DyService
         public static string TrimAll(this string str)
         {
             return str.Replace("&nbsp;","").Trim();
+        }
+
+        public static string NoHTML(this string Htmlstring)  //替换HTML标记
+        {
+            //删除脚本
+            Htmlstring = Regex.Replace(Htmlstring, @"<script[^>]*?>.*?</script>", "", RegexOptions.IgnoreCase);
+
+            //删除HTML
+            Htmlstring = Regex.Replace(Htmlstring, @"<(.[^>]*)>", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"([\r\n])[\s]+", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"-->", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"<!--.*", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(quot|#34);", "\"", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(amp|#38);", "&", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(lt|#60);", "<", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(gt|#62);", ">", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(nbsp|#160);", " ", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(iexcl|#161);", "\xa1", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(cent|#162);", "\xa2", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(pound|#163);", "\xa3", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&(copy|#169);", "\xa9", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"&#(\d+);", "", RegexOptions.IgnoreCase);
+            Htmlstring = Regex.Replace(Htmlstring, @"<img[^>]*>;", "", RegexOptions.IgnoreCase);
+            Htmlstring.Replace("<", "");
+            Htmlstring.Replace(">", "");
+            Htmlstring.Replace("\r\n", "");
+            return Htmlstring;
         }
     }
 }
