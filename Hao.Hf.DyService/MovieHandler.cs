@@ -192,7 +192,7 @@ namespace Hao.Hf.DyService
                         movieInfo.MainActors = actors.Replace("\r", "").Replace("\n", "");
 
                         var html = zoomHtml.Split(split.ToArray(), 2, StringSplitOptions.None)[1];
-                        if (html.Contains("◎") || html.Contains("一句话评论")||html.Contains("幕后制作") || html.Contains("幕后故事")||html.Contains("幕后：")) 
+                        if (html.Contains("◎") || html.Contains("一句话评论")||html.Contains("幕后制作") || html.Contains("幕后故事")||html.Contains("幕后：")|| html.Contains("<img")) 
                         {
                             var spt = new List<string>();
                             if(html.Contains("◎"))
