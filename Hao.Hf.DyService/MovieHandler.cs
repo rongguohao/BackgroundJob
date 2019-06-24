@@ -72,7 +72,7 @@ namespace Hao.Hf.DyService
                 {
                     area = zoomHtml.Split(new string[] { "◎地　　区" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                 }
-                if(!string.IsNullOrWhiteSpace(area))
+                if (!string.IsNullOrWhiteSpace(area))
                 {
                     movieInfo.Areas = await ConvertTypeArea<MArea>(area.Split('/'));
 
@@ -114,7 +114,7 @@ namespace Hao.Hf.DyService
                 if (zoomHtml.Contains("◎年　　代"))
                 {
                     yearStr = zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
-                    if(yearStr.Length>=4)
+                    if (yearStr.Length >= 4)
                     {
                         var year = HConvert.ToInt(yearStr.Substring(0, 4));
                         movieInfo.Year = year;
@@ -144,7 +144,7 @@ namespace Hao.Hf.DyService
                 {
                     releaseDate = zoomHtml.Split(new string[] { "◎上映日期" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
                 }
-               
+
                 if (!string.IsNullOrWhiteSpace(releaseDate))
                 {
                     foreach (Match match in Regex.Matches(releaseDate, @"((?<!\d)((\d{2,4}(\.|年|\/|\-))((((0?[13578]|1[02])(\.|月|\/|\-))((3[01])|([12][0-9])|(0?[1-9])))|(0?2(\.|月|\/|\-)((2[0-8])|(1[0-9])|(0?[1-9])))|(((0?[469]|11)(\.|月|\/|\-))((30)|([12][0-9])|(0?[1-9]))))|((([0-9]{2})((0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))(\.|年|\/|\-))0?2(\.|月|\/|\-)29))日?(?!\d))"))
@@ -160,14 +160,49 @@ namespace Hao.Hf.DyService
                 }
                 else
                 {
-                    if(!movieInfo.Year.HasValue)
+                    if (!movieInfo.Year.HasValue)
                     {
                         movieInfo.Year = date.Value.Year;
                     }
                 }
                 movieInfo.ReleaseDate = date;
 
-                if(zoomHtml.Contains("◎主　　演")|| zoomHtml.Contains("◎演　　员"))
+
+                var splitX = new List<string>();
+                if (zoomHtml.Contains("◎简") || zoomHtml.Contains("◎簡") || zoomHtml.Contains("◎剧情介绍") || zoomHtml.Contains("◎内容简介") || zoomHtml.Contains("◎剧　　情") || zoomHtml.Contains("◎剧情介绍")
+                        || zoomHtml.Contains("◎剧情简介"))
+                {
+
+                    if (zoomHtml.Contains("◎简"))
+                    {
+                        splitX.Add("◎简");
+                    }
+                    if (zoomHtml.Contains("◎簡"))
+                    {
+                        splitX.Add("◎簡");
+                    }
+                    else if (zoomHtml.Contains("◎剧情内幕"))
+                    {
+                        splitX.Add("◎剧情内幕");
+                    }
+                    else if (zoomHtml.Contains("◎内容简介"))
+                    {
+                        splitX.Add("◎内容简介");
+                    }
+                    else if (zoomHtml.Contains("◎剧　　情"))
+                    {
+                        splitX.Add("◎剧　　情");
+                    }
+                    else if (zoomHtml.Contains("◎剧情介绍"))
+                    {
+                        splitX.Add("◎剧情介绍");
+                    }
+                    else if (zoomHtml.Contains("◎剧情简介"))
+                    {
+                        splitX.Add("◎剧情简介");
+                    }
+                }
+                if (zoomHtml.Contains("◎主　　演") || zoomHtml.Contains("◎演　　员") || zoomHtml.Contains("◎旁　　白"))
                 {
                     var splitY = new List<string>();
                     if (zoomHtml.Contains("◎主　　演"))
@@ -178,92 +213,79 @@ namespace Hao.Hf.DyService
                     {
                         splitY.Add("◎演　　员");
                     }
-                    var actor = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
-
-                    if (zoomHtml.Contains("◎简") || zoomHtml.Contains("◎剧情介绍") || zoomHtml.Contains("◎内容简介") || zoomHtml.Contains("◎剧　　情") || zoomHtml.Contains("◎剧情介绍"))
+                    else if (zoomHtml.Contains("◎旁　　白"))
                     {
-                        var split = new List<string>();
-                        if (zoomHtml.Contains("◎简"))
-                        {
-                            split.Add("◎简");
-                        }
-                        else if (zoomHtml.Contains("◎剧情内幕"))
-                        {
-                            split.Add("◎剧情内幕");
-                        }
-                        else if (zoomHtml.Contains("◎内容简介"))
-                        {
-                            split.Add("◎内容简介");
-                        }
-                        else if (zoomHtml.Contains("◎剧　　情"))
-                        {
-                            split.Add("◎剧　　情");
-                        }
-                        else if (zoomHtml.Contains("◎剧情介绍"))
-                        {
-                            split.Add("◎剧情介绍");
-                        }
-                        var actors = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(split.ToArray(), 2, StringSplitOptions.None)[0].TrimAll();
+                        splitY.Add("◎旁　　白");
+                    }
+                    var actor = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
+                    movieInfo.MainActor = actor.Replace("\r", "").Replace("\n", "");
+                    if (splitX.Count>0)
+                    {
+                        var actors = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(splitX.ToArray(), 2, StringSplitOptions.None)[0].TrimAll();
                         actors = actors.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
-                        movieInfo.MainActor = actor.Replace("\r", "").Replace("\n", "");
                         movieInfo.MainActors = actors.Replace("\r", "").Replace("\n", "");
-
-                        var html = zoomHtml.Split(split.ToArray(), 2, StringSplitOptions.None)[1];
-                        if (html.Contains("◎") || html.Contains("一句话评论")||html.Contains("幕后制作") || html.Contains("幕后故事")||html.Contains("幕后：")|| html.Contains("<img")) 
-                        {
-                            var spt = new List<string>();
-                            if(html.Contains("◎"))
-                            {
-                                spt.Add("◎");
-                            }
-                            else if(html.Contains("一句话评论"))
-                            {
-                                spt.Add("一句话评论");
-                            }
-                            else if (html.Contains("幕后制作"))
-                            {
-                                spt.Add("幕后制作");
-                            }
-                            else if (html.Contains("幕后故事"))
-                            {
-                                spt.Add("幕后故事");
-                            }
-                            else if (html.Contains("幕后："))
-                            {
-                                spt.Add("幕后：");
-                            }
-                            else
-                            {
-                                spt.Add("<img");
-                            }
-                            var htmldes = html.Split(spt.ToArray(),2,StringSplitOptions.None)[0].TrimAll().Replace("\r", "").Replace("\n", "").Trim(',');
-                            htmldes = htmldes.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
-
-
-                            htmldes = htmldes.NoHTML().Trim(',').Trim();
-                            if (html.Length >= 4 && htmldes.Substring(0, 4) == "介 , ") 
-                            {
-                                htmldes = htmldes.Substring(4);
-                            }
-                            else if (html.Length >= 2&&htmldes.Substring(0, 2) == "介,")
-                            {
-                                htmldes = htmldes.Substring(2);
-                            }
-                            else if (html.Length >= 1 && htmldes.Substring(0, 1) == "介")
-                            {
-                                htmldes = htmldes.Substring(1);
-                            }
-                            movieInfo.Description = htmldes.NoHTML().Trim(',').Trim().Trim(',');
-                        }
                     }
                 }
 
+                if(splitX.Count>0)
+                {
+                    var html = zoomHtml.Split(splitX.ToArray(), 2, StringSplitOptions.None)[1];
+                    if (html.Contains("◎") || html.Contains("一句话评论") || html.Contains("幕后制作") || html.Contains("幕后故事") || html.Contains("幕后：") || html.Contains("<img")
+                        || html.Contains("【下载地址】"))
+                    {
+                        var spt = new List<string>();
+                        if (html.Contains("◎"))
+                        {
+                            spt.Add("◎");
+                        }
+                        else if (html.Contains("一句话评论"))
+                        {
+                            spt.Add("一句话评论");
+                        }
+                        else if (html.Contains("幕后制作"))
+                        {
+                            spt.Add("幕后制作");
+                        }
+                        else if (html.Contains("幕后故事"))
+                        {
+                            spt.Add("幕后故事");
+                        }
+                        else if (html.Contains("幕后："))
+                        {
+                            spt.Add("幕后：");
+                        }
+                        else if (html.Contains("【下载地址】"))
+                        {
+                            spt.Add("【下载地址】");
+                        }
+                        
+                        var htmldes = html.Split(spt.ToArray(), 2, StringSplitOptions.None)[0].TrimAll().Replace("\r", "").Replace("\n", "").Trim(',');
+                        htmldes = htmldes.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
+
+                        htmldes = htmldes.NoHTML().Trim(',').Trim();
+                        if (html.Length >= 4 && htmldes.Substring(0, 4) == "介 , ")
+                        {
+                            htmldes = htmldes.Substring(4);
+                        }
+                        else if (html.Length >= 2 && htmldes.Substring(0, 2) == "介,")
+                        {
+                            htmldes = htmldes.Substring(2);
+                        }
+                        else if (html.Length >= 1 && htmldes.Substring(0, 1) == "介")
+                        {
+                            htmldes = htmldes.Substring(1);
+                        }
+                        movieInfo.Description = htmldes.NoHTML().Trim(',').Trim().Trim(',');
+                    }
+                }
+
+
                 var pic = zoom.QuerySelectorAll("img").FirstOrDefault();
-                if (pic != null) 
+                if (pic != null)
                 {
                     var pUrl = pic.GetAttribute("src");
                     var width = HConvert.ToInt(pic.GetAttribute("width"));
-                    if (pUrl != null && width.HasValue && width < 550) 
+                    if (pUrl != null && width.HasValue && width < 550)
                     {
                         movieInfo.CoverPicture = pUrl;
                     }
@@ -274,7 +296,7 @@ namespace Hao.Hf.DyService
                 if (zoomHtml.Contains("\"magnet:?"))
                 {
                     var a = zoomHtml.Split(new string[] { "\"magnet:?" }, 2, StringSplitOptions.None);
-                    if(a.Length>1)
+                    if (a.Length > 1)
                     {
                         first = "magnet:?" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
                         movieInfo.DownloadUrlFirst = first;
@@ -283,7 +305,7 @@ namespace Hao.Hf.DyService
                 if (zoomHtml.Contains("\"thunder://"))
                 {
                     var a = zoomHtml.Split(new string[] { "\"thunder://" }, 2, StringSplitOptions.None);
-                    if(a.Length>1)
+                    if (a.Length > 1)
                     {
                         second = "thunder://" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
                         movieInfo.DownloadUrlSecond = second;
@@ -291,7 +313,7 @@ namespace Hao.Hf.DyService
                 }
                 if (zoomHtml.Contains("ftp://"))
                 {
-                    if(zoomHtml.Contains("\"ftp://"))
+                    if (zoomHtml.Contains("\"ftp://"))
                     {
                         var a = zoomHtml.Split(new string[] { "\"ftp://" }, 2, StringSplitOptions.None);
                         if (a.Length > 1)
@@ -333,7 +355,7 @@ namespace Hao.Hf.DyService
     {
         public static string TrimAll(this string str)
         {
-            return str.Replace("&nbsp;","").Trim();
+            return str.Replace("&nbsp;", "").Trim();
         }
 
         public static string NoHTML(this string Htmlstring)  //替换HTML标记
