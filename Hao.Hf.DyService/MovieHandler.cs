@@ -22,22 +22,8 @@ namespace Hao.Hf.DyService
 
                 var movieInfo = new Movie();
 
-
-
                 //电影的详细介绍 在id为Zoom的标签中
                 var zoom = movieDoc.GetElementById("Zoom");
-
-                var ps = zoom.QuerySelectorAll("p").ToList();
-
-
-
-                var divs = zoom.QuerySelectorAll("div").ToList();
-                if (divs.Count > 14)
-                {
-                    ps = ps.Take(2).ToList();
-                    ps.AddRange(divs);
-                }
-                var brs = zoom.QuerySelectorAll("br").ToList();
 
                 #region HtmlString
 
@@ -249,16 +235,15 @@ namespace Hao.Hf.DyService
                     }
                 }
 
-
-                var a = ps[0].Children.FirstOrDefault();
-                if (a != null) 
+                var pic = zoom.QuerySelectorAll("img").FirstOrDefault();
+                if (pic != null) 
                 {
-                    var pUrl = a.GetAttribute("src");
-                    if(pUrl != null)
+                    var pUrl = pic.GetAttribute("src");
+                    var width = HConvert.ToInt(pic.GetAttribute("width"));
+                    if (pUrl != null && width.HasValue && width < 550) 
                     {
                         movieInfo.CoverPicture = pUrl;
                     }
-
                 }
 
                 string[] splitUrl = new string[] { "\"" };
