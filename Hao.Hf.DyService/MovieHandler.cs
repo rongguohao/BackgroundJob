@@ -159,7 +159,7 @@ namespace Hao.Hf.DyService
                     {
                         releaseDate = match.Groups[0].Value;
                     }
-                    releaseDate = releaseDate.Replace("年", "-").Replace("月", "-");
+                    releaseDate = releaseDate.Replace("年", "-").Replace("月", "-").Replace(".", "-");
                 }
                 var date = HConvert.ToDateTime(releaseDate);
                 if (!date.HasValue)
@@ -188,13 +188,17 @@ namespace Hao.Hf.DyService
                         {
                             split.Add("◎简");
                         }
-                        else if (zoomHtml.Contains("◎剧情"))
+                        else if (zoomHtml.Contains("◎剧情内幕"))
                         {
-                            split.Add("◎剧情");
+                            split.Add("◎剧情内幕");
                         }
                         else if (zoomHtml.Contains("◎内容简介"))
                         {
                             split.Add("◎内容简介");
+                        }
+                        else if (zoomHtml.Contains("◎剧　　情"))
+                        {
+                            split.Add("◎剧　　情");
                         }
                         var actors = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(split.ToArray(), 2, StringSplitOptions.None)[0].TrimAll();
                         actors = actors.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
