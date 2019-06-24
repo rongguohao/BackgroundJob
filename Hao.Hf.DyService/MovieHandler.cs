@@ -180,7 +180,7 @@ namespace Hao.Hf.DyService
                     }
                     var actor = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
 
-                    if (zoomHtml.Contains("◎简") || zoomHtml.Contains("◎剧情介绍") || zoomHtml.Contains("◎内容简介"))
+                    if (zoomHtml.Contains("◎简") || zoomHtml.Contains("◎剧情介绍") || zoomHtml.Contains("◎内容简介") || zoomHtml.Contains("◎剧　　情") || zoomHtml.Contains("◎剧情介绍"))
                     {
                         var split = new List<string>();
                         if (zoomHtml.Contains("◎简"))
@@ -198,6 +198,10 @@ namespace Hao.Hf.DyService
                         else if (zoomHtml.Contains("◎剧　　情"))
                         {
                             split.Add("◎剧　　情");
+                        }
+                        else if (zoomHtml.Contains("◎剧情介绍"))
+                        {
+                            split.Add("◎剧情介绍");
                         }
                         var actors = zoomHtml.Split(splitY.ToArray(), 2, StringSplitOptions.None)[1].Split(split.ToArray(), 2, StringSplitOptions.None)[0].TrimAll();
                         actors = actors.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
@@ -244,7 +248,15 @@ namespace Hao.Hf.DyService
                             {
                                 htmldes = htmldes.Substring(2);
                             }
-                            movieInfo.Description = htmldes.Trim(',').Trim(' ');
+                            else if (html.Length >= 1 && htmldes.Substring(0, 1) == "介")
+                            {
+                                htmldes = htmldes.Substring(1);
+                            }
+                            movieInfo.Description = htmldes.Trim(',').Trim(' ').Replace("<span style=\"color: rgb(255, 255, 255);\">", "")
+                                                                               .Replace("</span>", "")
+                                                                               .Replace("dygod.net", "").Replace("www.dy2018.com", "")
+                                                                               .Replace("<span style=\"font-size: 14px;\">", "")
+                                                                               .Replace("<span style=\"color: rgb(0, 0, 0);\">", "");
                         }
                     }
                 }
