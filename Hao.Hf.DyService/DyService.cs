@@ -59,11 +59,11 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    await GetMovie(url, dom, i + 1, 1);
+                    //await GetMovie(url, dom, i + 1, 1);
 
                     if (pageNum > 0)
                     {
-                        for (int page = 2; page < pageNum; page++)
+                        for (int page = 67; page < pageNum; page++)
                         {
                             var url2 = "https://www.dy2018.com/" + i + $"/index_{page}.html";
 

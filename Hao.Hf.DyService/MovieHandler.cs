@@ -114,14 +114,20 @@ namespace Hao.Hf.DyService
                 if (zoomHtml.Contains("◎年　　代"))
                 {
                     yearStr = zoomHtml.Split(new string[] { "◎年　　代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
-                    var year = HConvert.ToInt(yearStr.Substring(0, 4));
-                    movieInfo.Year = year;
+                    if(yearStr.Length>=4)
+                    {
+                        var year = HConvert.ToInt(yearStr.Substring(0, 4));
+                        movieInfo.Year = year;
+                    }
                 }
                 if (zoomHtml.Contains("◎出品年代"))
                 {
                     yearStr = zoomHtml.Split(new string[] { "◎出品年代" }, 2, StringSplitOptions.None)[1].Split(splitFeature, 2, StringSplitOptions.None)[0].TrimAll();
-                    var year = HConvert.ToInt(yearStr.Substring(0, 4));
-                    movieInfo.Year = year;
+                    if (yearStr.Length >= 4)
+                    {
+                        var year = HConvert.ToInt(yearStr.Substring(0, 4));
+                        movieInfo.Year = year;
+                    }
                 }
 
 
@@ -151,6 +157,13 @@ namespace Hao.Hf.DyService
                 if (!date.HasValue)
                 {
                     date = HConvert.ToDateTime(movieInfo.Year.ToString() + "-01-01");
+                }
+                else
+                {
+                    if(!movieInfo.Year.HasValue)
+                    {
+                        movieInfo.Year = date.Value.Year;
+                    }
                 }
                 movieInfo.ReleaseDate = date;
 
@@ -221,12 +234,13 @@ namespace Hao.Hf.DyService
                             }
                             var htmldes = html.Split(spt.ToArray(),2,StringSplitOptions.None)[0].TrimAll().Replace("\r", "").Replace("\n", "").Trim(',');
                             htmldes = htmldes.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
-      
-                            if(htmldes.Substring(0,4)== "介 , ")
+
+
+                            if (html.Length >= 4 && htmldes.Substring(0, 4) == "介 , ") 
                             {
                                 htmldes = htmldes.Substring(4);
                             }
-                            else if (htmldes.Substring(0, 2) == "介,")
+                            else if (html.Length >= 2&&htmldes.Substring(0, 2) == "介,")
                             {
                                 htmldes = htmldes.Substring(2);
                             }
@@ -250,18 +264,42 @@ namespace Hao.Hf.DyService
                 string first = null, second = null, third = null;
                 if (zoomHtml.Contains("\"magnet:?"))
                 {
-                    first = "magnet:?" + zoomHtml.Split(new string[] { "\"magnet:?" }, 2, StringSplitOptions.None)[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
-                    movieInfo.DownloadUrlFirst = first;
+                    var a = zoomHtml.Split(new string[] { "\"magnet:?" }, 2, StringSplitOptions.None);
+                    if(a.Length>1)
+                    {
+                        first = "magnet:?" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
+                        movieInfo.DownloadUrlFirst = first;
+                    }
                 }
                 if (zoomHtml.Contains("\"thunder://"))
                 {
-                    second = "thunder://" + zoomHtml.Split(new string[] { "\thunder://" }, 2, StringSplitOptions.None)[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
-                    movieInfo.DownloadUrlSecond = second;
+                    var a = zoomHtml.Split(new string[] { "\"thunder://" }, 2, StringSplitOptions.None);
+                    if(a.Length>1)
+                    {
+                        second = "thunder://" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
+                        movieInfo.DownloadUrlSecond = second;
+                    }
                 }
                 if (zoomHtml.Contains("ftp://"))
                 {
-                    third = "ftp://" + zoomHtml.Split(new string[] { "ftp://" }, 2, StringSplitOptions.None)[1].Split(new string[] { "<" }, 2, StringSplitOptions.None)[0].TrimAll();
-                    movieInfo.DownloadUrlThird = third;
+                    if(zoomHtml.Contains("\"ftp://"))
+                    {
+                        var a = zoomHtml.Split(new string[] { "\"ftp://" }, 2, StringSplitOptions.None);
+                        if (a.Length > 1)
+                        {
+                            third = "ftp://" + a[1].Split(new string[] { "\"" }, 2, StringSplitOptions.None)[0].TrimAll();
+                            movieInfo.DownloadUrlThird = third;
+                        }
+                    }
+                    else
+                    {
+                        var a = zoomHtml.Split(new string[] { "ftp://" }, 2, StringSplitOptions.None);
+                        if (a.Length > 1)
+                        {
+                            third = "ftp://" + a[1].Split(new string[] { "<" }, 2, StringSplitOptions.None)[0].TrimAll();
+                            movieInfo.DownloadUrlThird = third;
+                        }
+                    }
                 }
 
                 #endregion
