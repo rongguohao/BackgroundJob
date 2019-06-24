@@ -26,6 +26,15 @@ namespace Hao.Hf.DyService
                 var zoom = movieDoc.GetElementById("Zoom");
 
                 #region HtmlString
+                var pic = zoom.QuerySelectorAll("img").FirstOrDefault();
+                if (pic == null) return null; //只找封面的电影
+                var pUrl = pic.GetAttribute("src");
+                var width = HConvert.ToInt(pic.GetAttribute("width"));
+                if (pUrl != null && width.HasValue && width < 550)
+                {
+                    movieInfo.CoverPicture = pUrl;
+                }
+
 
                 var zoomHtml = zoom.InnerHtml;
 
@@ -235,11 +244,11 @@ namespace Hao.Hf.DyService
                     }
                 }
 
-                if(splitX.Count>0)
+                if (splitX.Count > 0)
                 {
                     var html = zoomHtml.Split(splitX.ToArray(), 2, StringSplitOptions.None)[1];
                     if (html.Contains("◎") || html.Contains("一句话评论") || html.Contains("幕后制作") || html.Contains("幕后故事") || html.Contains("幕后：") || html.Contains("<img")
-                        ||  html.Contains("翻译点评:")|| html.Contains("【下载地址】") || html.Contains("【迅雷下载地址】"))
+                        || html.Contains("翻译点评:") || html.Contains("【下载地址】") || html.Contains("【迅雷下载地址】"))
                     {
                         var spt = new List<string>();
                         if (html.Contains("◎"))
@@ -292,18 +301,6 @@ namespace Hao.Hf.DyService
                             htmldes = htmldes.Substring(1);
                         }
                         movieInfo.Description = htmldes.NoHTML().Trim(',').Trim().Trim(',');
-                    }
-                }
-
-
-                var pic = zoom.QuerySelectorAll("img").FirstOrDefault();
-                if (pic != null)
-                {
-                    var pUrl = pic.GetAttribute("src");
-                    var width = HConvert.ToInt(pic.GetAttribute("width"));
-                    if (pUrl != null && width.HasValue && width < 550)
-                    {
-                        movieInfo.CoverPicture = pUrl;
                     }
                 }
 
