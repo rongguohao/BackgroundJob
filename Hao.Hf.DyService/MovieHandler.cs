@@ -308,13 +308,12 @@ namespace Hao.Hf.DyService
                 }
 
                 string[] splitUrl = new string[] { "\"" };
-                string first = null, second = null, third = null;
                 if (zoomHtml.Contains("\"magnet:?"))
                 {
                     var a = zoomHtml.Split(new string[] { "\"magnet:?" }, 2, StringSplitOptions.None);
                     if (a.Length > 1)
                     {
-                        first = "magnet:?" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
+                        var first = "magnet:?" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
                         movieInfo.DownloadUrlFirst = first;
                     }
                 }
@@ -323,7 +322,7 @@ namespace Hao.Hf.DyService
                     var a = zoomHtml.Split(new string[] { "\"thunder://" }, 2, StringSplitOptions.None);
                     if (a.Length > 1)
                     {
-                        second = "thunder://" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
+                        var second = "thunder://" + a[1].Split(splitUrl, 2, StringSplitOptions.None)[0].TrimAll();
                         movieInfo.DownloadUrlSecond = second;
                     }
                 }
@@ -334,7 +333,7 @@ namespace Hao.Hf.DyService
                         var a = zoomHtml.Split(new string[] { "\"ftp://" }, 2, StringSplitOptions.None);
                         if (a.Length > 1)
                         {
-                            third = "ftp://" + a[1].Split(new string[] { "\"" }, 2, StringSplitOptions.None)[0].TrimAll();
+                            var third = "ftp://" + a[1].Split(new string[] { "\"" }, 2, StringSplitOptions.None)[0].TrimAll();
                             movieInfo.DownloadUrlThird = third;
                         }
                     }
@@ -343,7 +342,7 @@ namespace Hao.Hf.DyService
                         var a = zoomHtml.Split(new string[] { "ftp://" }, 2, StringSplitOptions.None);
                         if (a.Length > 1)
                         {
-                            third = "ftp://" + a[1].Split(new string[] { "<" }, 2, StringSplitOptions.None)[0].TrimAll();
+                            var third = "ftp://" + a[1].Split(new string[] { "<" }, 2, StringSplitOptions.None)[0].TrimAll();
                             movieInfo.DownloadUrlThird = third;
                         }
                     }
