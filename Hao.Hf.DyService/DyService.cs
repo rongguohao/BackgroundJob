@@ -59,7 +59,7 @@ namespace Hao.Hf.DyService
                     }
 
                     //获取电影
-                    //await GetMovie(url, dom, i + 1, 1);
+                    await GetMovie(url, dom, i + 1, 1);
 
                     if (pageNum > 0)
                     {
