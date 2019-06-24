@@ -40,7 +40,7 @@ namespace Hao.Hf.DyService
             var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
-                if(response.StatusCode!=System.Net.HttpStatusCode.NotFound)
+                if(response.StatusCode==System.Net.HttpStatusCode.OK)
                 {
                     var t = await response.Content.ReadAsByteArrayAsync();
                     Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

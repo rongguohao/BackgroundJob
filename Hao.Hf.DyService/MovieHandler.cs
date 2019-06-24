@@ -170,7 +170,7 @@ namespace Hao.Hf.DyService
 
                 var splitX = new List<string>();
                 if (zoomHtml.Contains("◎简") || zoomHtml.Contains("◎簡") || zoomHtml.Contains("◎剧情介绍") || zoomHtml.Contains("◎内容简介") || zoomHtml.Contains("◎剧　　情") || zoomHtml.Contains("◎剧情介绍")
-                        || zoomHtml.Contains("◎剧情简介"))
+                        || zoomHtml.Contains("◎剧情简介")|| zoomHtml.Contains("◎影片简介")||zoomHtml.Contains("◎影片介绍"))
                 {
 
                     if (zoomHtml.Contains("◎简"))
@@ -200,6 +200,14 @@ namespace Hao.Hf.DyService
                     else if (zoomHtml.Contains("◎剧情简介"))
                     {
                         splitX.Add("◎剧情简介");
+                    }
+                    else if (zoomHtml.Contains("◎影片简介"))
+                    {
+                        splitX.Add("◎影片简介");
+                    }
+                    else if (zoomHtml.Contains("◎影片介绍"))
+                    {
+                        splitX.Add("◎影片介绍");
                     }
                 }
                 if (zoomHtml.Contains("◎主　　演") || zoomHtml.Contains("◎演　　员") || zoomHtml.Contains("◎旁　　白"))
@@ -231,7 +239,7 @@ namespace Hao.Hf.DyService
                 {
                     var html = zoomHtml.Split(splitX.ToArray(), 2, StringSplitOptions.None)[1];
                     if (html.Contains("◎") || html.Contains("一句话评论") || html.Contains("幕后制作") || html.Contains("幕后故事") || html.Contains("幕后：") || html.Contains("<img")
-                        || html.Contains("【下载地址】"))
+                        ||  html.Contains("翻译点评:")|| html.Contains("【下载地址】") || html.Contains("【迅雷下载地址】"))
                     {
                         var spt = new List<string>();
                         if (html.Contains("◎"))
@@ -254,11 +262,19 @@ namespace Hao.Hf.DyService
                         {
                             spt.Add("幕后：");
                         }
+                        else if (html.Contains("翻译点评:"))
+                        {
+                            spt.Add("翻译点评:");
+                        }
                         else if (html.Contains("【下载地址】"))
                         {
                             spt.Add("【下载地址】");
                         }
-                        
+                        else if (html.Contains("【迅雷下载地址】"))
+                        {
+                            spt.Add("【迅雷下载地址】");
+                        }
+
                         var htmldes = html.Split(spt.ToArray(), 2, StringSplitOptions.None)[0].TrimAll().Replace("\r", "").Replace("\n", "").Trim(',');
                         htmldes = htmldes.Replace("<br>", ",").Replace("　", "").Replace("</p>", ",").Replace("<p>", "").Replace("</div>", ",").Replace("<div>", "").Trim(',');
 
