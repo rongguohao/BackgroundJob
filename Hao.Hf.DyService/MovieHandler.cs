@@ -155,11 +155,11 @@ namespace Hao.Hf.DyService
                
                 if (!string.IsNullOrWhiteSpace(releaseDate))
                 {
-                    releaseDate = releaseDate.Replace("月", "-").Replace("日", "-");
-                    foreach (Match match in Regex.Matches(releaseDate, @"\d{4}-\d{1,2}"))
+                    foreach (Match match in Regex.Matches(releaseDate, @"((?<!\d)((\d{2,4}(\.|年|\/|\-))((((0?[13578]|1[02])(\.|月|\/|\-))((3[01])|([12][0-9])|(0?[1-9])))|(0?2(\.|月|\/|\-)((2[0-8])|(1[0-9])|(0?[1-9])))|(((0?[469]|11)(\.|月|\/|\-))((30)|([12][0-9])|(0?[1-9]))))|((([0-9]{2})((0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))(\.|年|\/|\-))0?2(\.|月|\/|\-)29))日?(?!\d))"))
                     {
                         releaseDate = match.Groups[0].Value;
                     }
+                    releaseDate = releaseDate.Replace("年", "-").Replace("月", "-");
                 }
                 var date = HConvert.ToDateTime(releaseDate);
                 if (!date.HasValue)
