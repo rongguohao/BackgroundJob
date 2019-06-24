@@ -8,5 +8,7 @@ namespace Hao.Hf.DyService
     public interface IHttpHelper
     {
         Task<string> GetHtmlByUrl(string url);
+
+        Task<string> GetPicByUrl(string url);
     }
 }

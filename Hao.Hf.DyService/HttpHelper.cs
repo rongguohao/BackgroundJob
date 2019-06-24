@@ -33,6 +33,30 @@ namespace Hao.Hf.DyService
             }
         }
 
+        public async Task<string> GetPicByUrl(string url)
+        {
+            try
+            {
+                var client = _httpClient.CreateClient();
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var t = await response.Content.ReadAsByteArrayAsync();
+                        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                        var ret = System.Text.Encoding.GetEncoding("GB2312").GetString(t);
+                        return ret;
+                    }
+                }
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
 
         private async Task<string> GetHtml(string url)
         {

@@ -29,11 +29,16 @@ namespace Hao.Hf.DyService
                 var pic = zoom.QuerySelectorAll("img").FirstOrDefault();
                 if (pic == null) return null; //只找封面的电影
                 var pUrl = pic.GetAttribute("src");
-                var width = HConvert.ToInt(pic.GetAttribute("width"));
-                if (pUrl != null && width.HasValue && width < 550)
+                //var width = HConvert.ToInt(pic.GetAttribute("width"));
+                if (pUrl != null)
                 {
-                    movieInfo.CoverPicture = pUrl;
+                    var phtml = await _http.GetPicByUrl(pUrl);
+                    if(!string.IsNullOrWhiteSpace(phtml))
+                    {
+                        movieInfo.CoverPicture = pUrl;
+                    }
                 }
+                if (string.IsNullOrWhiteSpace(movieInfo.CoverPicture)) return null;
 
 
                 var zoomHtml = zoom.InnerHtml;
