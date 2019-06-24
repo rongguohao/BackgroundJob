@@ -100,6 +100,7 @@ namespace Hao.Hf.DyService
             if (tables != null && tables.Count() > 0)
             {
                 int count = 1;
+                int countT = tables.Count();
                 foreach (var tb in tables)
                 {
                     var href = tb.QuerySelectorAll("a").Where(a => a.GetAttribute("href").Contains(".html")).FirstOrDefault().GetAttribute("href");
@@ -112,7 +113,7 @@ namespace Hao.Hf.DyService
                     Console.WriteLine($"{num++}电影名称：" + movieInfo.Name);
                     if (i.HasValue && page.HasValue) 
                     {
-                        Console.WriteLine("分类：" + i+"页数："+ page+"个数："+count);
+                        Console.WriteLine("分类：" + i+"页数："+ page+"个数："+count+"总数："+ countT);
                     }
                     Console.WriteLine("下载地址1：" + movieInfo.DownloadUrlFirst);
                     Console.WriteLine("下载地址2：" + movieInfo.DownloadUrlSecond);
