@@ -114,7 +114,7 @@ namespace backgroundjob
             });
 
             //BackgroundJob.Enqueue<IDyService>(a => a.PullMovieJustOnce()); //hangfire 执行超过30分钟的任务会停止
-
+            //0 0 10,16, * * ? //每天上午10点，下午16点
             RecurringJob.AddOrUpdate<IDyService>(a => a.PullMovieTiming(), "0 0 5,15,23 * * ?"); //每天上午5点，下午3点、11点
 
             app.UseMvc();
