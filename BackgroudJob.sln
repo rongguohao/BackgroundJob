@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hao.Hf.DyService", "Hao.Hf.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hao.Utility", "Hao.Utility\Hao.Utility.csproj", "{3C95A9D4-F0C8-4D16-B83C-046324558E66}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DyProgram", "dyprogram\DyProgram.csproj", "{ED6691A4-C079-4FE1-BED8-B56E1C1EB0DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DyProgram", "DyProgram\DyProgram.csproj", "{ED6691A4-C079-4FE1-BED8-B56E1C1EB0DA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackgroundJob.Host", "BackgroundJob.Host\BackgroundJob.Host.csproj", "{1343D919-A8C7-4F71-90A2-1D4C81DE6D57}"
 EndProject
