@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace dyprogram
+namespace DyProgram
 {
     class Program
     {
