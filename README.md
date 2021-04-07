@@ -1,3 +1,3 @@
 # backgroundjob
-# 当时拉取天堂电影数据 
-# hangfire,polly
+# 定时拉取天堂电影数据 
+# .net core框架,运用到hangfire,polly
